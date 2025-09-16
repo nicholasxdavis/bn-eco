@@ -34,12 +34,14 @@ function sendInvoiceEmail($client, $invoice) {
 
 // --- MAIN SCRIPT LOGIC ---
 
+/*
 // Only run on the 1st or 15th day of the month.
 $dayOfMonth = date('j');
 if ($dayOfMonth != 1 && $dayOfMonth != 15) {
     echo "Not a scheduled invoice day. Exiting.\n";
     exit;
 }
+*/
 
 // Get all active clients
 $stmt = $pdo->query("SELECT * FROM clients WHERE status = 'active'");
@@ -58,8 +60,8 @@ foreach ($clients as $client) {
     $dueDate = date('Y-m-d', strtotime('+14 days'));
 
     $stmt = $pdo->prepare("INSERT INTO invoices
-                          (client_id, client_name, amount, issued, due_date, status, service)
-                          VALUES (:client_id, :client_name, :amount, :issued, :due_date, :status, :service)");
+                           (client_id, client_name, amount, issued, due_date, status, service)
+                           VALUES (:client_id, :client_name, :amount, :issued, :due_date, :status, :service)");
     $stmt->execute([
         ':client_id' => $client['id'],
         ':client_name' => $client['company'],
