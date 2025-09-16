@@ -57,6 +57,26 @@ function sendInvoiceEmail($client, $invoice) {
 
 // --- MAIN SCRIPT LOGIC ---
 
+// Only run on the 1st day of the month.
+$dayOfMonth = date('j');
+if ($dayOfMonth != 1) {
+    // --- NEW: Calculate days until next run and log it ---
+    $today = new DateTime();
+    $nextRunDate = new DateTime('first day of next month');
+    $interval = $today->diff($nextRunDate);
+    $daysRemaining = $interval->days;
+
+    $logMessage = "Cron job ran on an invalid day. Days until next invoice run: " . $daysRemaining . " days.";
+    
+    // Log to server's PHP error log
+    error_log($logMessage);
+    
+    // Echo to console/output
+    echo $logMessage . " Exiting.\n";
+    
+    exit;
+}
+
 // Get all active clients
 $stmt = $pdo->query("SELECT * FROM clients WHERE status = 'active'");
 $clients = $stmt->fetchAll(PDO::FETCH_ASSOC);
