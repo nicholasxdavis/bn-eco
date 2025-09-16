@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    <!-- Add PayPal SDK -->
     <script src="https://www.paypal.com/sdk/js?client-id=AU6fuEjjnHJC-tnPDk4dMedZSTV7NulDC-qED1GXztyh_gYhP_nUwxmmbsLs2JYUM0QnS-M_cFYdZUR1&currency=USD"></script>
     <script>
         // Initialize EmailJS with your public key
@@ -72,7 +71,6 @@
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <!-- Header -->
     <header class="bg-white shadow-sm">
         <div class="flex justify-between items-center p-4 max-w-7xl mx-auto">
             <div class="flex items-center">
@@ -87,13 +85,11 @@
         </div>
     </header>
 
-    <!-- Notification -->
     <div id="notification" class="fixed top-4 right-4 p-4 rounded-lg shadow-lg hidden">
         <span id="notification-message"></span>
     </div>
 
     <div class="max-w-7xl mx-auto p-4">
-        <!-- Stats Section -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div id="stats-monthly-revenue" class="card bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                 <div class="flex justify-between items-center">
@@ -148,7 +144,6 @@
             </div>
         </div>
 
-        <!-- Action Buttons -->
         <div class="flex flex-wrap gap-4 mb-8">
             <button onclick="openModal('add-client-modal')" class="bg-primary hover:bg-accent text-white px-6 py-3 rounded-lg flex items-center">
                 <i class="fas fa-user-plus mr-2"></i> Add Client
@@ -159,13 +154,14 @@
             <button onclick="toggleAutoInvoice()" id="auto-invoice-btn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center">
                 <i class="fas fa-robot mr-2"></i> Auto-Invoice: ON
             </button>
-            <!-- New "Run in 5 Minutes" button for testing -->
-            <button onclick="scheduleTestInvoicing()" id="test-invoice-btn" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg flex items-center">
+            <button onclick="scheduleTestInvoicing(5)" id="test-invoice-btn" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg flex items-center">
                 <i class="fas fa-bolt mr-2"></i> Run in 5 Minutes
+            </button>
+            <button onclick="scheduleTestInvoicing(1)" id="auto-test-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center">
+                <i class="fas fa-vial mr-2"></i> Auto Test (1 Min)
             </button>
         </div>
 
-        <!-- Clients Section -->
         <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Clients</h2>
             <div class="overflow-x-auto">
@@ -181,13 +177,11 @@
                         </tr>
                     </thead>
                     <tbody id="clients-table-body">
-                        <!-- Client data will be populated here -->
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Invoices Section -->
         <div class="bg-white rounded-xl shadow-sm p-6">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Invoices</h2>
             <div class="overflow-x-auto">
@@ -203,14 +197,12 @@
                         </tr>
                     </thead>
                     <tbody id="invoices-table-body">
-                        <!-- Invoice data will be populated here -->
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Add Client Modal -->
     <div id="add-client-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-xl p-6 w-full max-w-md">
             <h3 class="text-xl font-semibold mb-4">Add New Client</h3>
@@ -250,7 +242,6 @@
         </div>
     </div>
 
-    <!-- Send Invoice Modal -->
     <div id="send-invoice-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-xl p-6 w-full max-w-md">
             <h3 class="text-xl font-semibold mb-4">Send Invoice</h3>
@@ -260,8 +251,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">Select Client</label>
                         <select id="invoice-client" class="w-full px-4 py-2 border rounded-lg" required>
                             <option value="">Select a client</option>
-                            <!-- Client options will be populated here -->
-                        </select>
+                            </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Service</label>
@@ -280,7 +270,6 @@
         </div>
     </div>
 
-    <!-- View Invoice Modal -->
     <div id="view-invoice-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-xl p-6 w-full max-w-md">
             <h3 class="text-xl font-semibold mb-4">Invoice Details</h3>
@@ -310,8 +299,7 @@
                     <p id="view-invoice-status" class="font-medium"></p>
                 </div>
                 <div id="paypal-button-container" class="hidden">
-                    <!-- PayPal button will be rendered here -->
-                </div>
+                    </div>
             </div>
             <div class="flex justify-end gap-3 mt-6">
                 <button type="button" onclick="closeModal('view-invoice-modal')" class="px-4 py-2 text-gray-600 hover:text-gray-800">Close</button>
@@ -407,26 +395,32 @@ async function checkTimerStatus() {
         }
         
         const result = await response.json();
-        const btn = document.getElementById('test-invoice-btn');
+        const testBtn = document.getElementById('test-invoice-btn');
+        const autoTestBtn = document.getElementById('auto-test-btn');
         
         if (result.active) {
             // Timer is active - update button text
-            const endTime = new Date(result.end_time);
+            const endTime = new Date(result.end_time + 'Z'); // Append Z to treat as UTC
             const now = new Date();
             const diffMs = endTime - now;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffSecs = Math.floor((diffMs % 60000) / 1000);
-            
-            btn.innerHTML = `<i class="fas fa-bolt mr-2"></i> Running in ${diffMins}:${diffSecs < 10 ? '0' : ''}${diffSecs}`;
-            btn.classList.remove('bg-purple-600', 'hover:bg-purple-700');
-            btn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-            btn.disabled = true;
+
+            if (diffMs > 0) {
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffSecs = Math.floor((diffMs % 60000) / 1000);
+                
+                const timerText = `Running in ${diffMins}:${diffSecs < 10 ? '0' : ''}${diffSecs}`;
+                testBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> ${timerText}`;
+                autoTestBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> ${timerText}`;
+                testBtn.disabled = true;
+                autoTestBtn.disabled = true;
+            }
+
         } else {
-            // Timer is not active - reset button
-            btn.innerHTML = '<i class="fas fa-bolt mr-2"></i> Run in 5 Minutes';
-            btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-            btn.classList.add('bg-purple-600', 'hover:bg-purple-700');
-            btn.disabled = false;
+            // Timer is not active - reset buttons
+            testBtn.innerHTML = '<i class="fas fa-bolt mr-2"></i> Run in 5 Minutes';
+            autoTestBtn.innerHTML = '<i class="fas fa-vial mr-2"></i> Auto Test (1 Min)';
+            testBtn.disabled = false;
+            autoTestBtn.disabled = false;
             
             // If timer just completed, run the invoicing
             if (result.message === 'Timer completed') {
@@ -440,19 +434,19 @@ async function checkTimerStatus() {
 }
 
 // Start a server-side timer
-async function startServerTimer() {
+async function startServerTimer(duration) {
     try {
         const response = await fetch(`${API_BASE}/timer.php`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ action: 'start' })
+            body: JSON.stringify({ action: 'start', duration: duration })
         });
         
         if (response.ok) {
             const result = await response.json();
-            showNotification('Test invoicing scheduled to run in 5 minutes.', 'info');
+            showNotification(`Test invoicing scheduled to run in ${duration} minute(s).`, 'info');
             checkTimerStatus(); // Immediately update the UI
         } else {
             console.error('Failed to start timer');
@@ -775,15 +769,14 @@ async function handleSendInvoice(e) {
     const service = document.getElementById('invoice-service').value;
     const amount = parseFloat(document.getElementById('invoice-amount').value);
     
-// Around line 1014 in index.html
-const newInvoice = {
-    client_id: client.id,
-    client_name: client.company,
-    amount: parseFloat(client.monthly_fee), // Use parseFloat to ensure it's a number
-    issued: today,
-    due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    service: client.service
-};
+    const newInvoice = {
+        client_id: clientId,
+        client_name: client.company,
+        amount: amount,
+        issued: new Date().toISOString().split('T')[0],
+        due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        service: service
+    };
     
     try {
         const response = await fetch(`${API_BASE}/invoices.php`, {
@@ -825,7 +818,14 @@ function sendEmail(client, invoice) {
         return;
     }
     
-    // Use the exact parameter format from your working code
+    // Ensure invoice.amount is a number before calling toFixed
+    const amount = parseFloat(invoice.amount);
+    if (isNaN(amount)) {
+        console.error('Invalid invoice amount:', invoice.amount);
+        showNotification('Failed to send email: Invalid invoice amount.', 'error');
+        return;
+    }
+
     const emailParams = {
         email: client.email,
         from_name: 'Blacnova Development',
@@ -833,7 +833,7 @@ function sendEmail(client, invoice) {
         invoiceNumber: invoice.id,
         dateIssued: formatDate(invoice.issued),
         service: invoice.service,
-        price: invoice.amount.toFixed(2),
+        price: amount.toFixed(2),
         dueDate: formatDate(invoice.due_date)
     };
     
@@ -891,7 +891,7 @@ function renderPayPalButton(invoice) {
             return actions.order.create({
                 purchase_units: [{
                     amount: {
-                        value: invoice.amount.toFixed(2)
+                        value: parseFloat(invoice.amount).toFixed(2)
                     },
                     description: `Invoice #${invoice.id} - ${invoice.service}`
                 }]
@@ -1012,16 +1012,21 @@ function sendMonthlyInvoices() {
             const newInvoice = {
                 client_id: client.id,
                 client_name: client.company,
-                amount: client.monthly_fee,
+                amount: parseFloat(client.monthly_fee), // Ensure amount is a number
                 issued: today,
                 due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
                 service: client.service
             };
             
-            // Create invoice on server (you would need to implement this)
-            // createInvoice(newInvoice);
+            // NOTE: In a real app, you would POST this to your API
+            // to save it in the database before sending the email.
+            // createInvoiceOnServer(newInvoice).then(newlyCreatedInvoice => {
+            //    sendEmail(client, newlyCreatedInvoice);
+            // });
             
-            // Send email
+            // For now, we simulate and send email directly.
+            // We'll give it a temporary ID for the email.
+            newInvoice.id = `auto-${Math.floor(Math.random() * 1000)}`;
             sendEmail(client, newInvoice);
         }
     });
@@ -1029,14 +1034,14 @@ function sendMonthlyInvoices() {
     showNotification('Monthly invoices sent to all active clients.', 'success');
 }
 
-// NEW FUNCTION: Schedule test invoicing in 5 minutes using server timer
-function scheduleTestInvoicing() {
-    startServerTimer();
+// Schedule test invoicing in X minutes using server timer
+function scheduleTestInvoicing(minutes) {
+    startServerTimer(minutes);
 }
 
 // Format date for display
 function formatDate(dateString) {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    const options = { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' };
     return new Date(dateString).toLocaleDateString(undefined, options);
 }
 
@@ -1046,7 +1051,7 @@ function showNotification(message, type = 'info') {
     const messageEl = document.getElementById('notification-message');
     
     // Remove previous classes
-    notification.classList.remove('bg-blue-500', 'bg-green-500', 'bg-red-500', 'bg-yellow-500');
+    notification.classList.remove('bg-blue-500', 'bg-green-500', 'bg-red-500', 'bg-yellow-500', 'text-white', 'text-black');
     
     // Set new classes based on type
     switch(type) {

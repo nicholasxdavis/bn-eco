@@ -11,18 +11,23 @@ try {
             
             if (isset($input['action'])) {
                 if ($input['action'] === 'start') {
-                    // Start a 5-minute timer
-                    $endTime = date('Y-m-d H:i:s', strtotime('+5 minutes'));
+                    // Get duration from input, default to 5 minutes
+                    $minutes = isset($input['duration']) ? (int)$input['duration'] : 5;
+
+                    // Start a timer using UTC to avoid timezone issues
+                    $endTime = new DateTime("now", new DateTimeZone("UTC"));
+                    $endTime->add(new DateInterval("PT{$minutes}M"));
+                    $endTimeStr = $endTime->format('Y-m-d H:i:s');
                     
                     $stmt = $pdo->prepare("INSERT INTO timers (name, end_time) 
                                           VALUES ('test_invoice', :end_time)
                                           ON DUPLICATE KEY UPDATE end_time = :end_time");
-                    $stmt->execute([':end_time' => $endTime]);
+                    $stmt->execute([':end_time' => $endTimeStr]);
                     
                     echo json_encode([
                         'success' => true,
-                        'message' => 'Timer started',
-                        'end_time' => $endTime
+                        'message' => "Timer started for {$minutes} minutes",
+                        'end_time' => $endTimeStr
                     ]);
                 }
                 elseif ($input['action'] === 'status') {
@@ -32,15 +37,14 @@ try {
                     $timer = $stmt->fetch();
                     
                     if ($timer) {
-                        $currentTime = new DateTime();
-                        $endTime = new DateTime($timer['end_time']);
+                        // Compare times in UTC
+                        $currentTime = new DateTime("now", new DateTimeZone("UTC"));
+                        $endTime = new DateTime($timer['end_time'], new DateTimeZone("UTC"));
                         
                         if ($currentTime < $endTime) {
-                            $remaining = $currentTime->diff($endTime);
                             echo json_encode([
                                 'active' => true,
-                                'end_time' => $timer['end_time'],
-                                'remaining' => $remaining->format('%i minutes %s seconds')
+                                'end_time' => $timer['end_time']
                             ]);
                         } else {
                             echo json_encode([
