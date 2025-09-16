@@ -328,9 +328,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('add-client-form').addEventListener('submit', handleAddClient);
     document.getElementById('send-invoice-form').addEventListener('submit', handleSendInvoice);
     
-    // Set up automatic monthly invoicing
-    scheduleMonthlyInvoicing();
-    
     // Check for overdue invoices daily
     checkOverdueInvoices();
 });
@@ -876,18 +873,6 @@ function updateAutoInvoiceButton() {
         btn.innerHTML = '<i class="fas fa-robot mr-2"></i> Auto-Invoice: OFF';
         btn.classList.remove('bg-green-600', 'hover:bg-green-700');
         btn.classList.add('bg-gray-600', 'hover:bg-gray-700');
-    }
-}
-
-// Schedule automatic monthly invoicing
-function scheduleMonthlyInvoicing() {
-    // This is a client-side simulation. For reliable invoicing, use a server-side cron job.
-    // Check if it's the first day of the month and auto invoice is enabled
-    const today = new Date();
-    if (today.getDate() === 1 && autoInvoiceEnabled) {
-        // In a real application, a server cron job would handle this.
-        // We'll show a notification to simulate the event.
-        showNotification('It\'s the first of the month! Auto-invoicing would run now.', 'info');
     }
 }
 
