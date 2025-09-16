@@ -1,47 +1,69 @@
 <?php
 require_once 'db_connect.php';
 
-// IMPORTANT: This script is designed to be run by a server cron job.
-
-// --- SERVER-SIDE EMAIL CONFIGURATION ---
-// You CANNOT use EmailJS on the server. You need a server-side email solution
-// like PHPMailer or an API from a service like SendGrid or Mailgun.
-
+// --- SERVER-SIDE EMAIL FUNCTION USING EmailJS REST API ---
 function sendInvoiceEmail($client, $invoice) {
-    // This is a placeholder function. You must replace this with your actual
-    // server-side email sending logic.
-    
-    $to = $client['email'];
-    $subject = "New Invoice from Blacnova Development";
-    
-    $body = "Hello " . $client['contact'] . ",\n\n";
-    $body .= "This is your monthly invoice for " . $invoice['service'] . ".\n\n";
-    $body .= "Invoice #: " . $invoice['id'] . "\n";
-    $body .= "Amount Due: $" . number_format($invoice['amount'], 2) . "\n";
-    $body .= "Due Date: " . date("M d, Y", strtotime($invoice['due_date'])) . "\n\n";
-    $body .= "Thank you for your business!\n";
-    $body .= "Blacnova Development";
+    // --- Your EmailJS Details ---
+    $service_id = 'service_g3x1dzf';     // <-- PASTE YOUR SERVICE ID HERE
+    $template_id = 'template_ptf2tzg';    // <-- PASTE YOUR TEMPLATE ID HERE
+    $user_id = 'mGAM0CatzjBKJTVe9';         // Your Public Key
+    $accessToken = 'vvI_4F6Wh4tCZKXB8r2Kx'; // Your Private Key
 
-    // For now, we will log the email to the server's error log for testing.
-    // Check your server's PHP error logs to see this output.
-    error_log("--- NEW INVOICE (SIMULATED EMAIL) ---");
-    error_log("To: " . $to);
-    error_log("Subject: " . $subject);
-    error_log("Body: \n" . $body);
-    error_log("------------------------------------");
+    // These parameters must match the variables in your EmailJS template
+    // e.g., {{customerName}}, {{invoiceNumber}}, etc.
+    $template_params = [
+        'customerName' => $client['contact'],
+        'email' => $client['email'],
+        'invoiceNumber' => $invoice['id'],
+        'dateIssued' => date("M d, Y", strtotime($invoice['issued'])),
+        'service' => $invoice['service'],
+        'price' => number_format($invoice['amount'], 2),
+        'dueDate' => date("M d, Y", strtotime($invoice['due_date'])),
+        'from_name' => 'Blacnova Development'
+    ];
+
+    // Prepare the data for the API request
+    $data = [
+        'service_id' => $service_id,
+        'template_id' => $template_id,
+        'user_id' => $user_id,
+        'template_params' => $template_params,
+        'accessToken' => $accessToken
+    ];
+
+    $payload = json_encode($data);
+
+    // Use cURL to send the request to the EmailJS API
+    $ch = curl_init('https://api.emailjs.com/api/v1.0/email/send');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLINFO_HEADER_OUT, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Content-Length: ' . strlen($payload)
+    ]);
+
+    $response = curl_exec($ch);
+    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    // Log the result for debugging
+    if ($httpcode == 200) {
+        error_log("EmailJS API Success: Email sent to " . $client['email']);
+    } else {
+        error_log("EmailJS API Error: Failed to send email to " . $client['email'] . ". Response: " . $response);
+    }
 }
-
 
 // --- MAIN SCRIPT LOGIC ---
 
-/*
 // Only run on the 1st or 15th day of the month.
 $dayOfMonth = date('j');
 if ($dayOfMonth != 1 && $dayOfMonth != 15) {
     echo "Not a scheduled invoice day. Exiting.\n";
     exit;
 }
-*/
 
 // Get all active clients
 $stmt = $pdo->query("SELECT * FROM clients WHERE status = 'active'");
@@ -60,8 +82,8 @@ foreach ($clients as $client) {
     $dueDate = date('Y-m-d', strtotime('+14 days'));
 
     $stmt = $pdo->prepare("INSERT INTO invoices
-                           (client_id, client_name, amount, issued, due_date, status, service)
-                           VALUES (:client_id, :client_name, :amount, :issued, :due_date, :status, :service)");
+                          (client_id, client_name, amount, issued, due_date, status, service)
+                          VALUES (:client_id, :client_name, :amount, :issued, :due_date, :status, :service)");
     $stmt->execute([
         ':client_id' => $client['id'],
         ':client_name' => $client['company'],
@@ -78,6 +100,7 @@ foreach ($clients as $client) {
         'id' => $invoiceId,
         'amount' => $client['monthly_fee'],
         'service' => $client['service'],
+        'issued' => $today,
         'due_date' => $dueDate
     ];
     
@@ -85,5 +108,5 @@ foreach ($clients as $client) {
     $invoicedClients++;
 }
 
-echo "Invoicing task completed. " . $invoicedClients . " invoices were created and sent.\n";
+echo "Invoicing task completed. " . $invoicedClients . " invoices were processed.\n";
 ?>
