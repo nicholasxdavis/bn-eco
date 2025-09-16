@@ -48,6 +48,13 @@ function sendInvoiceEmail($client, $invoice) {
     $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
+    // --- TEMPORARY DEBUGGING ---
+    echo "<h2>EmailJS Debug Info:</h2>";
+    echo "<p><strong>HTTP Status Code:</strong> " . $httpcode . "</p>";
+    echo "<p><strong>EmailJS Response:</strong> " . $response . "</p>";
+    // --- END TEMPORARY DEBUGGING ---
+
+
     // Log the result for debugging
     if ($httpcode == 200) {
         error_log("EmailJS API Success: Email sent to " . $client['email']);
