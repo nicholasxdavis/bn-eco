@@ -359,39 +359,39 @@ document.addEventListener('DOMContentLoaded', function() {
     timerCheckInterval = setInterval(checkTimerStatus, 10000);
 });
 
-// Fetch clients from server
+// Update your fetch functions to handle errors properly
 async function fetchClients() {
     try {
         const response = await fetch(`${API_BASE}/clients.php`);
-        if (response.ok) {
-            clients = await response.json();
-            loadClients();
-            updateStats();
-        } else {
-            console.error('Failed to fetch clients');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+        const data = await response.json();
+        clients = data;
+        loadClients();
+        updateStats();
     } catch (error) {
         console.error('Error fetching clients:', error);
+        showNotification('Failed to fetch clients', 'error');
     }
 }
 
-// Fetch invoices from server
 async function fetchInvoices() {
     try {
         const response = await fetch(`${API_BASE}/invoices.php`);
-        if (response.ok) {
-            invoices = await response.json();
-            loadInvoices();
-            updateStats();
-        } else {
-            console.error('Failed to fetch invoices');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+        const data = await response.json();
+        invoices = data;
+        loadInvoices();
+        updateStats();
     } catch (error) {
         console.error('Error fetching invoices:', error);
+        showNotification('Failed to fetch invoices', 'error');
     }
 }
 
-// Check timer status from server
 async function checkTimerStatus() {
     try {
         const response = await fetch(`${API_BASE}/timer.php`, {
@@ -402,37 +402,37 @@ async function checkTimerStatus() {
             body: JSON.stringify({ action: 'status' })
         });
         
-        if (response.ok) {
-            const result = await response.json();
-            const btn = document.getElementById('test-invoice-btn');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        const btn = document.getElementById('test-invoice-btn');
+        
+        if (result.active) {
+            // Timer is active - update button text
+            const endTime = new Date(result.end_time);
+            const now = new Date();
+            const diffMs = endTime - now;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffSecs = Math.floor((diffMs % 60000) / 1000);
             
-            if (result.active) {
-                // Timer is active - update button text
-                const endTime = new Date(result.end_time);
-                const now = new Date();
-                const diffMs = endTime - now;
-                const diffMins = Math.floor(diffMs / 60000);
-                const diffSecs = Math.floor((diffMs % 60000) / 1000);
-                
-                btn.innerHTML = `<i class="fas fa-bolt mr-2"></i> Running in ${diffMins}:${diffSecs < 10 ? '0' : ''}${diffSecs}`;
-                btn.classList.remove('bg-purple-600', 'hover:bg-purple-700');
-                btn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-                btn.disabled = true;
-            } else {
-                // Timer is not active - reset button
-                btn.innerHTML = '<i class="fas fa-bolt mr-2"></i> Run in 5 Minutes';
-                btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-                btn.classList.add('bg-purple-600', 'hover:bg-purple-700');
-                btn.disabled = false;
-                
-                // If timer just completed, run the invoicing
-                if (result.message === 'Timer completed') {
-                    sendMonthlyInvoices();
-                    showNotification('Test invoicing completed successfully!', 'success');
-                }
-            }
+            btn.innerHTML = `<i class="fas fa-bolt mr-2"></i> Running in ${diffMins}:${diffSecs < 10 ? '0' : ''}${diffSecs}`;
+            btn.classList.remove('bg-purple-600', 'hover:bg-purple-700');
+            btn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            btn.disabled = true;
         } else {
-            console.error('Failed to check timer status');
+            // Timer is not active - reset button
+            btn.innerHTML = '<i class="fas fa-bolt mr-2"></i> Run in 5 Minutes';
+            btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            btn.classList.add('bg-purple-600', 'hover:bg-purple-700');
+            btn.disabled = false;
+            
+            // If timer just completed, run the invoicing
+            if (result.message === 'Timer completed') {
+                sendMonthlyInvoices();
+                showNotification('Test invoicing completed successfully!', 'success');
+            }
         }
     } catch (error) {
         console.error('Error checking timer status:', error);
