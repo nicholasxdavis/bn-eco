@@ -10,10 +10,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-$host = 'd80wc4s4s84swcwgw4ckowo8';
+$host = 'f08cwk48kso8wo84wk0ow840';
 $dbname = 'default';
 $user = 'mariadb';
-$pass = 'S0SiC4AwcT2E08mTlLc7fBqoitlwYP1mnMewHNXjcF2ZUM1J4OFjlsRahxdepIO1';
+$pass = 'k8VUnt2oZhIgKebpi226TaRT9nwJN7B9kKGvhXTdqBNdzfnLe5r3hPmgLIVPZLYm';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass);
