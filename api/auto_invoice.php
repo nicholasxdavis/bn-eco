@@ -4,9 +4,9 @@ require_once 'db_connect.php';
 // --- SERVER-SIDE EMAIL FUNCTION USING EmailJS REST API ---
 function sendInvoiceEmail($client, $invoice) {
     // --- Your EmailJS Details ---
-    $service_id = 'service_g3x1dzf';     // <-- PASTE YOUR SERVICE ID HERE
-    $template_id = 'template_ptf2tzg';    // <-- PASTE YOUR TEMPLATE ID HERE
-    $user_id = 'mGAM0CatzjBKJTVe9';         // Your Public Key
+    $service_id = 'service_g3x1dzf';   // <-- PASTE YOUR SERVICE ID HERE
+    $template_id = 'template_ptf2tzg';   // <-- PASTE YOUR TEMPLATE ID HERE
+    $user_id = 'mGAM0CatzjBKJTVe9';       // Your Public Key
     $accessToken = 'vvI_4F6Wh4tCZKXB8r2Kx'; // Your Private Key
 
     // These parameters must match the variables in your EmailJS template
@@ -58,12 +58,14 @@ function sendInvoiceEmail($client, $invoice) {
 
 // --- MAIN SCRIPT LOGIC ---
 
+/*
 // Only run on the 1st or 15th day of the month.
 $dayOfMonth = date('j');
 if ($dayOfMonth != 1 && $dayOfMonth != 15) {
     echo "Not a scheduled invoice day. Exiting.\n";
     exit;
 }
+*/
 
 // Get all active clients
 $stmt = $pdo->query("SELECT * FROM clients WHERE status = 'active'");
@@ -82,8 +84,8 @@ foreach ($clients as $client) {
     $dueDate = date('Y-m-d', strtotime('+14 days'));
 
     $stmt = $pdo->prepare("INSERT INTO invoices
-                          (client_id, client_name, amount, issued, due_date, status, service)
-                          VALUES (:client_id, :client_name, :amount, :issued, :due_date, :status, :service)");
+                           (client_id, client_name, amount, issued, due_date, status, service)
+                           VALUES (:client_id, :client_name, :amount, :issued, :due_date, :status, :service)");
     $stmt->execute([
         ':client_id' => $client['id'],
         ':client_name' => $client['company'],
