@@ -1,5 +1,5 @@
 <?php
-require_once 'api/db_connect.php';
+require_once 'db_connect.php';
 
 // Get all active clients
 $stmt = $pdo->query("SELECT * FROM clients WHERE status = 'active'");
@@ -9,9 +9,9 @@ $clients = $stmt->fetchAll(PDO::FETCH_ASSOC);
 foreach ($clients as $client) {
     $today = date('Y-m-d');
     $dueDate = date('Y-m-d', strtotime('+14 days'));
-    
-    $stmt = $pdo->prepare("INSERT INTO invoices 
-                          (client_id, client_name, amount, issued, due_date, status, service) 
+
+    $stmt = $pdo->prepare("INSERT INTO invoices
+                          (client_id, client_name, amount, issued, due_date, status, service)
                           VALUES (:client_id, :client_name, :amount, :issued, :due_date, :status, :service)");
     $stmt->execute([
         ':client_id' => $client['id'],
@@ -22,9 +22,9 @@ foreach ($clients as $client) {
         ':status' => 'pending',
         ':service' => $client['service']
     ]);
-    
+
     $invoiceId = $pdo->lastInsertId();
-    
+
     // Send email (you would need to implement this)
     // sendInvoiceEmail($client, $invoiceId);
 }
