@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 // Get database credentials from environment variables
 $host = 'f08cwk48kso8wo84wk0ow840';
-$dbname = 'bneco';
+$dbname = 'default';
 $user = 'mariadb';
 $pass = 'k8VUnt2oZhIgKebpi226TaRT9nwJN7B9kKGvhXTdqBNdzfnLe5r3hPmgLIVPZLYm';
 
@@ -27,3 +27,4 @@ try {
 }
 
 ?>
+
