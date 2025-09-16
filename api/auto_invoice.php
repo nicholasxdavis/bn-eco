@@ -4,13 +4,12 @@ require_once 'db_connect.php';
 // --- SERVER-SIDE EMAIL FUNCTION USING EmailJS REST API ---
 function sendInvoiceEmail($client, $invoice) {
     // --- Your EmailJS Details ---
-    $service_id = 'service_g3x1dzf';   // <-- PASTE YOUR SERVICE ID HERE
-    $template_id = 'template_ptf2tzg';   // <-- PASTE YOUR TEMPLATE ID HERE
-    $user_id = 'mGAM0CatzjBKJTVe9';       // Your Public Key
+    $service_id = 'service_g3x1dzf';
+    $template_id = 'template_ptf2tzg';
+    $user_id = 'mGAM0CatzjBKJTVe9';
     $accessToken = 'vvI_4F6Wh4tCZKXB8r2Kx'; // Your Private Key
 
     // These parameters must match the variables in your EmailJS template
-    // e.g., {{customerName}}, {{invoiceNumber}}, etc.
     $template_params = [
         'customerName' => $client['contact'],
         'email' => $client['email'],
@@ -48,14 +47,7 @@ function sendInvoiceEmail($client, $invoice) {
     $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
-    // --- TEMPORARY DEBUGGING ---
-    echo "<h2>EmailJS Debug Info:</h2>";
-    echo "<p><strong>HTTP Status Code:</strong> " . $httpcode . "</p>";
-    echo "<p><strong>EmailJS Response:</strong> " . $response . "</p>";
-    // --- END TEMPORARY DEBUGGING ---
-
-
-    // Log the result for debugging
+    // Log the result for debugging in your server's error log
     if ($httpcode == 200) {
         error_log("EmailJS API Success: Email sent to " . $client['email']);
     } else {
@@ -64,15 +56,6 @@ function sendInvoiceEmail($client, $invoice) {
 }
 
 // --- MAIN SCRIPT LOGIC ---
-
-/*
-// Only run on the 1st or 15th day of the month.
-$dayOfMonth = date('j');
-if ($dayOfMonth != 1 && $dayOfMonth != 15) {
-    echo "Not a scheduled invoice day. Exiting.\n";
-    exit;
-}
-*/
 
 // Get all active clients
 $stmt = $pdo->query("SELECT * FROM clients WHERE status = 'active'");
