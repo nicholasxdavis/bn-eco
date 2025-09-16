@@ -154,12 +154,6 @@
             <button onclick="toggleAutoInvoice()" id="auto-invoice-btn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center">
                 <i class="fas fa-robot mr-2"></i> Auto-Invoice: ON
             </button>
-            <button onclick="scheduleTestInvoicing(5)" id="test-invoice-btn" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg flex items-center">
-                <i class="fas fa-bolt mr-2"></i> Run in 5 Minutes
-            </button>
-            <button onclick="scheduleTestInvoicing(1)" id="auto-test-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center">
-                <i class="fas fa-vial mr-2"></i> Auto Test (1 Min)
-            </button>
         </div>
 
         <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
@@ -323,14 +317,11 @@ let clients = [];
 let invoices = [];
 let autoInvoiceEnabled = true;
 let lastMonthRevenue = 0;
-let testInvoiceTimer = null;
-let timerCheckInterval = null;
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     fetchClients();
     fetchInvoices();
-    checkTimerStatus();
     updateAutoInvoiceButton();
     
     // Set up form handlers
@@ -342,9 +333,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Check for overdue invoices daily
     checkOverdueInvoices();
-    
-    // Check timer status every 10 seconds
-    timerCheckInterval = setInterval(checkTimerStatus, 10000);
 });
 
 // Update your fetch functions to handle errors properly
@@ -377,84 +365,6 @@ async function fetchInvoices() {
     } catch (error) {
         console.error('Error fetching invoices:', error);
         showNotification('Failed to fetch invoices', 'error');
-    }
-}
-
-async function checkTimerStatus() {
-    try {
-        const response = await fetch(`${API_BASE}/timer.php`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ action: 'status' })
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const result = await response.json();
-        const testBtn = document.getElementById('test-invoice-btn');
-        const autoTestBtn = document.getElementById('auto-test-btn');
-        
-        if (result.active) {
-            // Timer is active - update button text
-            const endTime = new Date(result.end_time + 'Z'); // Append Z to treat as UTC
-            const now = new Date();
-            const diffMs = endTime - now;
-
-            if (diffMs > 0) {
-                const diffMins = Math.floor(diffMs / 60000);
-                const diffSecs = Math.floor((diffMs % 60000) / 1000);
-                
-                const timerText = `Running in ${diffMins}:${diffSecs < 10 ? '0' : ''}${diffSecs}`;
-                testBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> ${timerText}`;
-                autoTestBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> ${timerText}`;
-                testBtn.disabled = true;
-                autoTestBtn.disabled = true;
-            }
-
-        } else {
-            // Timer is not active - reset buttons
-            testBtn.innerHTML = '<i class="fas fa-bolt mr-2"></i> Run in 5 Minutes';
-            autoTestBtn.innerHTML = '<i class="fas fa-vial mr-2"></i> Auto Test (1 Min)';
-            testBtn.disabled = false;
-            autoTestBtn.disabled = false;
-            
-            // If timer just completed, run the invoicing
-            if (result.message === 'Timer completed') {
-                sendMonthlyInvoices();
-                showNotification('Test invoicing completed successfully!', 'success');
-            }
-        }
-    } catch (error) {
-        console.error('Error checking timer status:', error);
-    }
-}
-
-// Start a server-side timer
-async function startServerTimer(duration) {
-    try {
-        const response = await fetch(`${API_BASE}/timer.php`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ action: 'start', duration: duration })
-        });
-        
-        if (response.ok) {
-            const result = await response.json();
-            showNotification(`Test invoicing scheduled to run in ${duration} minute(s).`, 'info');
-            checkTimerStatus(); // Immediately update the UI
-        } else {
-            console.error('Failed to start timer');
-            showNotification('Failed to schedule test invoicing.', 'error');
-        }
-    } catch (error) {
-        console.error('Error starting timer:', error);
-        showNotification('Failed to schedule test invoicing.', 'error');
     }
 }
 
@@ -971,72 +881,14 @@ function updateAutoInvoiceButton() {
 
 // Schedule automatic monthly invoicing
 function scheduleMonthlyInvoicing() {
+    // This is a client-side simulation. For reliable invoicing, use a server-side cron job.
     // Check if it's the first day of the month and auto invoice is enabled
     const today = new Date();
     if (today.getDate() === 1 && autoInvoiceEnabled) {
-        sendMonthlyInvoices();
+        // In a real application, a server cron job would handle this.
+        // We'll show a notification to simulate the event.
+        showNotification('It\'s the first of the month! Auto-invoicing would run now.', 'info');
     }
-    
-    // Check every hour if it's the first of the month
-    setInterval(() => {
-        const now = new Date();
-        if (now.getDate() === 1 && now.getHours() === 0 && now.getMinutes() === 0 && autoInvoiceEnabled) {
-            sendMonthlyInvoices();
-        }
-    }, 60 * 60 * 1000); // Check every hour
-}
-
-// Send invoices to all active clients
-function sendMonthlyInvoices() {
-    // Save last month's revenue before creating new invoices
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    
-    const monthlyRevenue = invoices
-        .filter(invoice => {
-            const invoiceDate = new Date(invoice.issued);
-            return invoice.status === 'paid' && 
-                   invoiceDate.getMonth() === currentMonth && 
-                   invoiceDate.getFullYear() === currentYear;
-        })
-        .reduce((sum, invoice) => sum + parseFloat(invoice.amount), 0);
-    
-    lastMonthRevenue = monthlyRevenue;
-    localStorage.setItem('lastMonthRevenue', JSON.stringify(lastMonthRevenue));
-    
-    // Create invoices for all active clients
-    clients.forEach(client => {
-        if (client.status === 'active') {
-            const today = new Date().toISOString().split('T')[0];
-            
-            const newInvoice = {
-                client_id: client.id,
-                client_name: client.company,
-                amount: parseFloat(client.monthly_fee), // Ensure amount is a number
-                issued: today,
-                due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                service: client.service
-            };
-            
-            // NOTE: In a real app, you would POST this to your API
-            // to save it in the database before sending the email.
-            // createInvoiceOnServer(newInvoice).then(newlyCreatedInvoice => {
-            //    sendEmail(client, newlyCreatedInvoice);
-            // });
-            
-            // For now, we simulate and send email directly.
-            // We'll give it a temporary ID for the email.
-            newInvoice.id = `auto-${Math.floor(Math.random() * 1000)}`;
-            sendEmail(client, newInvoice);
-        }
-    });
-    
-    showNotification('Monthly invoices sent to all active clients.', 'success');
-}
-
-// Schedule test invoicing in X minutes using server timer
-function scheduleTestInvoicing(minutes) {
-    startServerTimer(minutes);
 }
 
 // Format date for display
