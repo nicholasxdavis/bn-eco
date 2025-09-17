@@ -77,7 +77,10 @@
                 <img src="https://www.blacnova.net/img/bn.png" alt="Blacnova Development" class="h-8 mr-2">
                 <h1 class="text-xl font-semibold text-gray-800">BN-Client Dashboard</h1>
             </div>
-            <div class="flex items-center">
+            <div class="flex items-center space-x-4">
+                <button onclick="openModal('user-management-modal')" class="text-gray-600 hover:text-primary">
+                    <i class="fas fa-users-cog"></i>
+                </button>
                 <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center">
                     <span>AD</span>
                 </div>
@@ -301,7 +304,52 @@
         </div>
     </div>
 
-    <script>
+    <div id="user-management-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl p-6 w-full max-w-4xl">
+            <h3 class="text-xl font-semibold mb-4">User Management</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="text-lg font-medium mb-2">Create New User</h4>
+                    <form id="create-user-form" class="space-y-4">
+                        <input type="text" id="full-name" placeholder="Full Name" class="w-full px-4 py-2 border rounded-lg" required>
+                        <input type="email" id="email" placeholder="Email" class="w-full px-4 py-2 border rounded-lg" required>
+                        <input type="password" id="password" placeholder="Password" class="w-full px-4 py-2 border rounded-lg" required>
+                        <select id="role" class="w-full px-4 py-2 border rounded-lg">
+                            <option value="viewer">Viewer</option>
+                            <option value="editor">Editor</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                        <button type="submit" class="bg-primary hover:bg-accent text-white px-4 py-2 rounded-lg w-full">Create User</button>
+                    </form>
+                </div>
+                <div>
+                    <h4 class="text-lg font-medium mb-2">Existing Users</h4>
+                    <div id="users-list" class="space-y-2 max-h-64 overflow-y-auto"></div>
+                </div>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button type="button" onclick="closeModal('user-management-modal')" class="px-4 py-2 text-gray-600 hover:text-gray-800">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="login-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center">
+        <div class="bg-white rounded-xl p-6 w-full max-w-sm">
+            <h3 class="text-xl font-semibold mb-4 text-center">Dashboard Login</h3>
+            <form id="login-form">
+                <div class="space-y-4">
+                    <input type="email" id="login-email" placeholder="Email" class="w-full px-4 py-2 border rounded-lg" required>
+                    <input type="password" id="login-password" placeholder="Password" class="w-full px-4 py-2 border rounded-lg" required>
+                </div>
+                <div class="mt-6">
+                    <button type="submit" class="bg-primary hover:bg-accent text-white px-4 py-2 rounded-lg w-full">Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+  <script>
 // Initialize EmailJS with your public key
 (function() {
     try {
