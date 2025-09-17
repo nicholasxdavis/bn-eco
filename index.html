@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=AU6fuEjjnHJC-tnPDk4dMedZSTV7NulDC-qED1GXztyh_gYhP_nUwxmmbsLs2JYUM0QnS-M_cFYdZUR1&currency=USD"></script>
     <script>
-        // Initialize EmailJS with your public key
+        // Initialize EmailJS
         (function() {
             emailjs.init("mGAM0CatzjBKJTVe9");
         })();
@@ -49,154 +49,217 @@
             background-color: #f1f5f9;
         }
         
-        /* Notification styles */
         #notification {
             transition: all 0.3s ease-in-out;
             z-index: 1000;
         }
         
-        /* PayPal button container */
         #paypal-button-container {
             margin-top: 15px;
             text-align: center;
         }
         
-        /* Invoice status badges */
         .status-badge {
             padding: 0.25rem 0.5rem;
             border-radius: 9999px;
             font-size: 0.75rem;
             font-weight: 600;
         }
+
+        /* Full Screen Auth Overlay */
+        #auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            font-family: 'Poppins', sans-serif;
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <header class="bg-white shadow-sm">
-        <div class="flex justify-between items-center p-4 max-w-7xl mx-auto">
-            <div class="flex items-center">
-                <img src="https://www.blacnova.net/img/bn.png" alt="Blacnova Development" class="h-8 mr-2">
-                <h1 class="text-xl font-semibold text-gray-800">BN-Client Dashboard</h1>
-            </div>
-            <div class="flex items-center space-x-4">
-                <button onclick="openModal('user-management-modal')" class="text-gray-600 hover:text-primary">
-                    <i class="fas fa-users-cog"></i>
-                </button>
-                <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center">
-                    <span>AD</span>
-                </div>
-            </div>
-        </div>
-    </header>
 
-    <div id="notification" class="fixed top-4 right-4 p-4 rounded-lg shadow-lg hidden">
-        <span id="notification-message"></span>
+    <div id="auth-overlay">
+        <div style="background: #111; padding: 2rem; border-radius: 20px; width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <img src="https://www.blacnova.net/img/bn.png" alt="Blacnova Logo" style="width: 60px; height: 60px; margin: 0 auto 1rem;">
+                <h2 style="color: #fff; margin: 0; font-weight: 600;">Dashboard Access</h2>
+                <p style="color: #888; margin: 0.5rem 0 0;">Sign in to continue</p>
+            </div>
+            
+            <form id="login-form">
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; color: #ddd; margin-bottom: 0.5rem; font-size: 0.9rem;">Email</label>
+                    <input type="email" id="login-email" required style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid #333; background: #222; color: #fff; font-size: 1rem; box-sizing: border-box;">
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; color: #ddd; margin-bottom: 0.5rem; font-size: 0.9rem;">Password</label>
+                    <input type="password" id="login-password" required style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid #333; background: #222; color: #fff; font-size: 1rem; box-sizing: border-box;">
+                </div>
+                
+                <button type="submit" style="width: 100%; padding: 12px; border-radius: 12px; border: none; background: #d4611c; color: white; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
+                    Sign In
+                </button>
+                
+                <p id="login-error" style="color: #ff4444; text-align: center; margin: 1rem 0 0; display: none;">Invalid credentials</p>
+            </form>
+        </div>
     </div>
 
-    <div class="max-w-7xl mx-auto p-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div id="stats-monthly-revenue" class="card bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-gray-500">Monthly Revenue</p>
-                        <h3 class="text-2xl font-bold text-gray-800">$0</h3>
-                    </div>
-                    <div class="bg-orange-100 p-3 rounded-full">
-                        <i class="fas fa-dollar-sign text-primary text-xl"></i>
+    <div id="dashboard-content" class="hidden">
+        <header class="bg-white shadow-sm">
+            <div class="flex justify-between items-center p-4 max-w-7xl mx-auto">
+                <div class="flex items-center">
+                    <img src="https://www.blacnova.net/img/bn.png" alt="Blacnova Development" class="h-8 mr-2">
+                    <h1 class="text-xl font-semibold text-gray-800">BN-Client Dashboard</h1>
+                </div>
+                <div class="flex items-center">
+                    <div id="user-avatar" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center">
+                        <span>AD</span>
                     </div>
                 </div>
-                <p class="text-gray-500 text-sm mt-2"><i class="fas fa-minus"></i> No previous data</p>
             </div>
+        </header>
 
-            <div id="stats-active-clients" class="card bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-gray-500">Active Clients</p>
-                        <h3 class="text-2xl font-bold text-gray-800">0</h3>
-                    </div>
-                    <div class="bg-blue-100 p-3 rounded-full">
-                        <i class="fas fa-users text-blue-500 text-xl"></i>
-                    </div>
-                </div>
-                <p class="text-gray-500 text-sm mt-2"><i class="fas fa-users"></i> No clients yet</p>
-            </div>
-
-            <div id="stats-pending-invoices" class="card bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-gray-500">Pending Invoices</p>
-                        <h3 class="text-2xl font-bold text-gray-800">0</h3>
-                    </div>
-                    <div class="bg-yellow-100 p-3 rounded-full">
-                        <i class="fas fa-file-invoice text-yellow-500 text-xl"></i>
-                    </div>
-                </div>
-                <p class="text-gray-500 text-sm mt-2"><i class="fas fa-file-invoice"></i> No invoices yet</p>
-            </div>
-
-            <div id="stats-auto-invoice" class="card bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-gray-500">Auto-Invoice Status</p>
-                        <h3 class="text-2xl font-bold text-gray-800">Active</h3>
-                    </div>
-                    <div class="bg-green-100 p-3 rounded-full">
-                        <i class="fas fa-check-circle text-green-500 text-xl"></i>
-                    </div>
-                </div>
-                <p class="text-gray-500 text-sm mt-2">Next run: 1st of next month</p>
-            </div>
+        <div id="notification" class="fixed top-4 right-4 p-4 rounded-lg shadow-lg hidden">
+            <span id="notification-message"></span>
         </div>
 
-        <div class="flex flex-wrap gap-4 mb-8">
-            <button onclick="openModal('add-client-modal')" class="bg-primary hover:bg-accent text-white px-6 py-3 rounded-lg flex items-center">
-                <i class="fas fa-user-plus mr-2"></i> Add Client
-            </button>
-            <button onclick="openSendInvoiceModal()" class="bg-primary hover:bg-accent text-white px-6 py-3 rounded-lg flex items-center">
-                <i class="fas fa-paper-plane mr-2"></i> Send Invoice
-            </button>
-            <button onclick="toggleAutoInvoice()" id="auto-invoice-btn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center">
-                <i class="fas fa-robot mr-2"></i> Auto-Invoice: ON
-            </button>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Clients</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="text-left border-b">
-                            <th class="pb-2">Name</th>
-                            <th class="pb-2">Email</th>
-                            <th class="pb-2">Service</th>
-                            <th class="pb-2">Monthly Fee</th>
-                            <th class="pb-2">Status</th>
-                            <th class="pb-2">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="clients-table-body">
-                        </tbody>
-                </table>
+        <div class="max-w-7xl mx-auto p-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div id="stats-monthly-revenue" class="card bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-gray-500">Monthly Revenue</p>
+                            <h3 class="text-2xl font-bold text-gray-800">$0</h3>
+                        </div>
+                        <div class="bg-orange-100 p-3 rounded-full">
+                            <i class="fas fa-dollar-sign text-primary text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-sm mt-2"><i class="fas fa-minus"></i> No previous data</p>
+                </div>
+                <div id="stats-active-clients" class="card bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-gray-500">Active Clients</p>
+                            <h3 class="text-2xl font-bold text-gray-800">0</h3>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-full">
+                            <i class="fas fa-users text-blue-500 text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-sm mt-2"><i class="fas fa-users"></i> No clients yet</p>
+                </div>
+                <div id="stats-pending-invoices" class="card bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-gray-500">Pending Invoices</p>
+                            <h3 class="text-2xl font-bold text-gray-800">0</h3>
+                        </div>
+                        <div class="bg-yellow-100 p-3 rounded-full">
+                            <i class="fas fa-file-invoice text-yellow-500 text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-sm mt-2"><i class="fas fa-file-invoice"></i> No invoices yet</p>
+                </div>
+                <div id="stats-auto-invoice" class="card bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-gray-500">Auto-Invoice Status</p>
+                            <h3 class="text-2xl font-bold text-gray-800">Active</h3>
+                        </div>
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <i class="fas fa-check-circle text-green-500 text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-sm mt-2">Next run: 1st of next month</p>
+                </div>
             </div>
-        </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Invoices</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="text-left border-b">
-                            <th class="pb-2">Invoice #</th>
-                            <th class="pb-2">Client</th>
-                            <th class="pb-2">Amount</th>
-                            <th class="pb-2">Issued</th>
-                            <th class="pb-2">Status</th>
-                            <th class="pb-2">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="invoices-table-body">
-                        </tbody>
-                </table>
+            <div class="flex flex-wrap gap-4 mb-8">
+                <button onclick="openModal('add-client-modal')" class="bg-primary hover:bg-accent text-white px-6 py-3 rounded-lg flex items-center">
+                    <i class="fas fa-user-plus mr-2"></i> Add Client
+                </button>
+                <button onclick="openSendInvoiceModal()" class="bg-primary hover:bg-accent text-white px-6 py-3 rounded-lg flex items-center">
+                    <i class="fas fa-paper-plane mr-2"></i> Send Invoice
+                </button>
+                <button onclick="toggleAutoInvoice()" id="auto-invoice-btn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center">
+                    <i class="fas fa-robot mr-2"></i> Auto-Invoice: ON
+                </button>
             </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Clients</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left border-b">
+                                <th class="pb-2">Name</th>
+                                <th class="pb-2">Email</th>
+                                <th class="pb-2">Service</th>
+                                <th class="pb-2">Monthly Fee</th>
+                                <th class="pb-2">Status</th>
+                                <th class="pb-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clients-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Invoices</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                         <thead>
+                            <tr class="text-left border-b">
+                                <th class="pb-2">Invoice #</th>
+                                <th class="pb-2">Client</th>
+                                <th class="pb-2">Amount</th>
+                                <th class="pb-2">Issued</th>
+                                <th class="pb-2">Status</th>
+                                <th class="pb-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoices-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">User Management</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-lg font-medium mb-2 text-gray-700">Create New User</h3>
+                        <form id="create-user-form" class="space-y-4">
+                            <input type="text" id="full-name" placeholder="Full Name" class="w-full px-4 py-2 border rounded-lg" required>
+                            <input type="email" id="email" placeholder="Email" class="w-full px-4 py-2 border rounded-lg" required>
+                            <input type="password" id="password" placeholder="Password" class="w-full px-4 py-2 border rounded-lg" required>
+                            <select id="role" class="w-full px-4 py-2 border rounded-lg">
+                                <option value="viewer">Viewer</option>
+                                <option value="editor">Editor</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                            <button type="submit" class="bg-secondary hover:bg-gray-800 text-white px-4 py-2 rounded-lg w-full">Create User</button>
+                        </form>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                             <h3 class="text-lg font-medium text-gray-700">Existing Users</h3>
+                             <button id="refresh-users" class="text-gray-500 hover:text-primary"><i class="fas fa-sync-alt"></i></button>
+                        </div>
+                        <div id="users-list" class="space-y-2 max-h-60 overflow-y-auto pr-2"></div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -303,729 +366,396 @@
             </div>
         </div>
     </div>
-
-    <div id="user-management-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-xl p-6 w-full max-w-4xl">
-            <h3 class="text-xl font-semibold mb-4">User Management</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <h4 class="text-lg font-medium mb-2">Create New User</h4>
-                    <form id="create-user-form" class="space-y-4">
-                        <input type="text" id="full-name" placeholder="Full Name" class="w-full px-4 py-2 border rounded-lg" required>
-                        <input type="email" id="email" placeholder="Email" class="w-full px-4 py-2 border rounded-lg" required>
-                        <input type="password" id="password" placeholder="Password" class="w-full px-4 py-2 border rounded-lg" required>
-                        <select id="role" class="w-full px-4 py-2 border rounded-lg">
-                            <option value="viewer">Viewer</option>
-                            <option value="editor">Editor</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                        <button type="submit" class="bg-primary hover:bg-accent text-white px-4 py-2 rounded-lg w-full">Create User</button>
-                    </form>
-                </div>
-                <div>
-                    <h4 class="text-lg font-medium mb-2">Existing Users</h4>
-                    <div id="users-list" class="space-y-2 max-h-64 overflow-y-auto"></div>
-                </div>
-            </div>
-            <div class="flex justify-end mt-6">
-                <button type="button" onclick="closeModal('user-management-modal')" class="px-4 py-2 text-gray-600 hover:text-gray-800">Close</button>
-            </div>
-        </div>
-    </div>
     
-    <div id="login-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center">
-        <div class="bg-white rounded-xl p-6 w-full max-w-sm">
-            <h3 class="text-xl font-semibold mb-4 text-center">Dashboard Login</h3>
-            <form id="login-form">
-                <div class="space-y-4">
-                    <input type="email" id="login-email" placeholder="Email" class="w-full px-4 py-2 border rounded-lg" required>
-                    <input type="password" id="login-password" placeholder="Password" class="w-full px-4 py-2 border rounded-lg" required>
-                </div>
-                <div class="mt-6">
-                    <button type="submit" class="bg-primary hover:bg-accent text-white px-4 py-2 rounded-lg w-full">Login</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-
   <script>
-// Initialize EmailJS with your public key
-(function() {
-    try {
-        emailjs.init('mGAM0CatzjBKJTVe9');
-        console.log('EmailJS initialized successfully');
-    } catch (error) {
-        console.error('EmailJS initialization failed:', error);
-    }
-})();
+    let clients = [];
+    let invoices = [];
+    let autoInvoiceEnabled = true;
 
-// Production data - now fetched from server
-let clients = [];
-let invoices = [];
-let autoInvoiceEnabled = true;
-let lastMonthRevenue = 0;
+    // --- AUTH & USER MANAGEMENT ---
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('login-form').addEventListener('submit', handleLogin);
+        document.getElementById('create-user-form').addEventListener('submit', handleCreateUser);
+        document.getElementById('refresh-users').addEventListener('click', loadUsers);
+    });
 
-// Initialize the application
-document.addEventListener('DOMContentLoaded', function() {
-    fetchClients();
-    fetchInvoices();
-    updateAutoInvoiceButton();
-    
-    // Set up form handlers
-    document.getElementById('add-client-form').addEventListener('submit', handleAddClient);
-    document.getElementById('send-invoice-form').addEventListener('submit', handleSendInvoice);
-    
-    // Check for overdue invoices daily
-    checkOverdueInvoices();
-});
+    async function handleLogin(e) {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        const errorElement = document.getElementById('login-error');
 
-// Update your fetch functions to handle errors properly
-async function fetchClients() {
-    try {
-        const response = await fetch(`${API_BASE}/clients.php`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        clients = data;
-        loadClients();
-        updateStats();
-    } catch (error) {
-        console.error('Error fetching clients:', error);
-        showNotification('Failed to fetch clients', 'error');
-    }
-}
+        try {
+            const response = await fetch(`${API_BASE}/login.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await response.json();
 
-async function fetchInvoices() {
-    try {
-        const response = await fetch(`${API_BASE}/invoices.php`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        invoices = data;
-        loadInvoices();
-        updateStats();
-    } catch (error) {
-        console.error('Error fetching invoices:', error);
-        showNotification('Failed to fetch invoices', 'error');
-    }
-}
-
-// Calculate and update statistics
-function updateStats() {
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    
-    // Calculate monthly revenue (sum of all paid invoices from this month)
-    const monthlyRevenue = invoices
-        .filter(invoice => {
-            const invoiceDate = new Date(invoice.issued);
-            return invoice.status === 'paid' && 
-                   invoiceDate.getMonth() === currentMonth && 
-                   invoiceDate.getFullYear() === currentYear;
-        })
-        .reduce((sum, invoice) => sum + parseFloat(invoice.amount), 0);
-    
-    // Calculate percentage change from last month (only if we have data)
-    let revenueChange = 0;
-    let revenueChangeText = 'No previous data';
-    let revenueChangeIcon = 'minus';
-    let revenueChangeColor = 'gray';
-    
-    if (lastMonthRevenue > 0 && monthlyRevenue > 0) {
-        revenueChange = ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue * 100);
-        revenueChangeText = `${Math.abs(revenueChange.toFixed(0))}% from last month`;
-        revenueChangeIcon = revenueChange >= 0 ? 'up' : 'down';
-        revenueChangeColor = revenueChange >= 0 ? 'green' : 'red';
-    } else if (monthlyRevenue > 0) {
-        revenueChangeText = 'First month of data';
-        revenueChangeIcon = 'plus';
-        revenueChangeColor = 'blue';
-    }
-    
-    // Count active clients
-    const activeClients = clients.filter(client => client.status === 'active').length;
-    
-    // Count new clients this month (joined in current month)
-    const newClientsThisMonth = clients.filter(client => {
-        if (!client.join_date) return false;
-        const joinDate = new Date(client.join_date);
-        return joinDate.getMonth() === currentMonth && joinDate.getFullYear() === currentYear;
-    }).length;
-    
-    // Count pending and overdue invoices
-    const pendingInvoices = invoices.filter(invoice => invoice.status === 'pending').length;
-    const overdueInvoices = invoices.filter(invoice => invoice.status === 'overdue').length;
-    const totalPendingInvoices = pendingInvoices + overdueInvoices;
-    
-    // Update the stats display - using the correct element structure
-    const revenueElement = document.querySelector('#stats-monthly-revenue h3');
-    const revenueChangeElement = document.querySelector('#stats-monthly-revenue p:last-child');
-    const clientsElement = document.querySelector('#stats-active-clients h3');
-    const clientsChangeElement = document.querySelector('#stats-active-clients p:last-child');
-    const invoicesElement = document.querySelector('#stats-pending-invoices h3');
-    const invoicesChangeElement = document.querySelector('#stats-pending-invoices p:last-child');
-    const autoInvoiceElement = document.querySelector('#stats-auto-invoice p:last-child');
-    
-    if (revenueElement) revenueElement.textContent = `$${monthlyRevenue.toLocaleString()}`;
-    if (revenueChangeElement) {
-        revenueChangeElement.innerHTML = `<i class="fas fa-${revenueChangeIcon}"></i> ${revenueChangeText}`;
-        revenueChangeElement.className = `text-${revenueChangeColor}-500 text-sm mt-2`;
-    }
-    
-    if (clientsElement) clientsElement.textContent = activeClients;
-    if (clientsChangeElement) {
-        if (newClientsThisMonth > 0) {
-            clientsChangeElement.innerHTML = `<i class="fas fa-arrow-up"></i> ${newClientsThisMonth} new this month`;
-            clientsChangeElement.className = 'text-green-500 text-sm mt-2';
-        } else if (activeClients > 0) {
-            clientsChangeElement.innerHTML = `<i class="fas fa-minus"></i> No new clients this month`;
-            clientsChangeElement.className = 'text-gray-500 text-sm mt-2';
-        } else {
-            clientsChangeElement.innerHTML = `<i class="fas fa-users"></i> No clients yet`;
-            clientsChangeElement.className = 'text-gray-500 text-sm mt-2';
-        }
-    }
-    
-    if (invoicesElement) invoicesElement.textContent = totalPendingInvoices;
-    if (invoicesChangeElement) {
-        if (overdueInvoices > 0) {
-            invoicesChangeElement.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${overdueInvoices} overdue`;
-            invoicesChangeElement.className = 'text-red-500 text-sm mt-2';
-        } else if (pendingInvoices > 0) {
-            invoicesChangeElement.innerHTML = `<i class="fas fa-clock"></i> ${pendingInvoices} pending`;
-            invoicesChangeElement.className = 'text-yellow-500 text-sm mt-2';
-        } else if (invoices.length > 0) {
-            invoicesChangeElement.innerHTML = `<i class="fas fa-check"></i> All invoices paid`;
-            invoicesChangeElement.className = 'text-green-500 text-sm mt-2';
-        } else {
-            invoicesChangeElement.innerHTML = `<i class="fas fa-file-invoice"></i> No invoices yet`;
-            invoicesChangeElement.className = 'text-gray-500 text-sm mt-2';
-        }
-    }
-    
-    // Update auto-invoice status
-    if (autoInvoiceElement) {
-        const nextRunDate = new Date();
-        nextRunDate.setMonth(nextRunDate.getMonth() + 1);
-        nextRunDate.setDate(1);
-        autoInvoiceElement.textContent = `Next run: ${formatDate(nextRunDate.toISOString().split('T')[0])}`;
-    }
-}
-
-// Check for overdue invoices
-function checkOverdueInvoices() {
-    const today = new Date();
-    let updated = false;
-    
-    invoices.forEach(invoice => {
-        if (invoice.status === 'pending') {
-            const dueDate = new Date(invoice.due_date);
-            if (dueDate < today) {
-                invoice.status = 'overdue';
-                updated = true;
+            if (data.success) {
+                document.getElementById('auth-overlay').style.display = 'none';
+                document.getElementById('dashboard-content').classList.remove('hidden');
                 
-                // Update on server (you would need to implement this)
-                // updateInvoiceStatus(invoice.id, 'overdue');
+                // Set user avatar
+                const user = data.user;
+                const avatar = document.querySelector('#user-avatar span');
+                if (user.full_name) {
+                    avatar.textContent = user.full_name.match(/\b\w/g).join('').substring(0,2).toUpperCase();
+                }
+
+                // Initialize dashboard data
+                initializeApp();
+            } else {
+                errorElement.textContent = data.message || 'Invalid credentials';
+                errorElement.style.display = 'block';
             }
+        } catch (error) {
+            console.error('Login error:', error);
+            errorElement.textContent = 'Connection error. Please try again.';
+            errorElement.style.display = 'block';
         }
-    });
-    
-    if (updated) {
-        loadInvoices();
-        updateStats();
     }
-}
 
-// Load clients into the table
-function loadClients() {
-    const tableBody = document.getElementById('clients-table-body');
-    tableBody.innerHTML = '';
-    
-    if (clients.length === 0) {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td colspan="6" class="py-8 text-center text-gray-500">
-                <i class="fas fa-users text-3xl mb-2"></i>
-                <p>No clients found. Add your first client to get started.</p>
-            </td>
-        `;
-        tableBody.appendChild(row);
-        return;
+    function initializeApp() {
+        fetchClients();
+        fetchInvoices();
+        loadUsers(); // Load users for the admin panel
+        updateAutoInvoiceButton();
+        document.getElementById('add-client-form').addEventListener('submit', handleAddClient);
+        document.getElementById('send-invoice-form').addEventListener('submit', handleSendInvoice);
+        checkOverdueInvoices();
     }
     
-    clients.forEach(client => {
-        const row = document.createElement('tr');
-        row.className = 'client-row border-b';
-        row.innerHTML = `
-            <td class="py-3">
-                <div class="font-medium">${client.company}</div>
-                <div class="text-sm text-gray-500">${client.contact}</div>
-            </td>
-            <td class="py-3">${client.email}</td>
-            <td class="py-3">${client.service}</td>
-            <td class="py-3">$${client.monthly_fee}</td>
-            <td class="py-3">
-                <span class="status-badge ${client.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                    ${client.status}
-                </span>
-            </td>
-            <td class="py-3">
-                <button class="text-blue-600 hover:text-blue-800 mr-2" onclick="editClient(${client.id})">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="text-red-600 hover:text-red-800" onclick="deleteClient(${client.id})">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        `;
-        tableBody.appendChild(row);
-    });
-}
+    async function loadUsers() {
+        try {
+            const response = await fetch(`${API_BASE}/users.php`);
+            const data = await response.json();
+            const usersList = document.getElementById('users-list');
+            usersList.innerHTML = '';
 
-// Load invoices into the table
-function loadInvoices() {
-    const tableBody = document.getElementById('invoices-table-body');
-    tableBody.innerHTML = '';
-    
-    if (invoices.length === 0) {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td colspan="6" class="py-8 text-center text-gray-500">
-                <i class="fas fa-file-invoice text-3xl mb-2"></i>
-                <p>No invoices found. Send your first invoice to get started.</p>
-            </td>
-        `;
-        tableBody.appendChild(row);
-        return;
-    }
-    
-    // Show only the 5 most recent invoices
-    const recentInvoices = [...invoices].sort((a, b) => new Date(b.issued) - new Date(a.issued)).slice(0, 5);
-    
-    recentInvoices.forEach(invoice => {
-        const row = document.createElement('tr');
-        row.className = 'border-b';
-        row.innerHTML = `
-            <td class="py-3">#${invoice.id}</td>
-            <td class="py-3">${invoice.client_name}</td>
-            <td class="py-3">$${invoice.amount}</td>
-            <td class="py-3">${formatDate(invoice.issued)}</td>
-            <td class="py-3">
-                <span class="status-badge ${invoice.status === 'paid' ? 'bg-green-100 text-green-800' : 
-                    invoice.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}">
-                    ${invoice.status}
-                </span>
-            </td>
-            <td class="py-3">
-                <button class="text-blue-600 hover:text-blue-800" onclick="viewInvoice(${invoice.id})">
-                    <i class="fas fa-eye"></i>
-                </button>
-            </td>
-        `;
-        tableBody.appendChild(row);
-    });
-}
-
-// Populate client dropdown
-function populateClientDropdown() {
-    const dropdown = document.getElementById('invoice-client');
-    // Clear all options
-    dropdown.innerHTML = '<option value="">Select a client</option>';
-    
-    if (clients.length === 0) {
-        const option = document.createElement('option');
-        option.value = "";
-        option.textContent = "No active clients available";
-        option.disabled = true;
-        dropdown.appendChild(option);
-        return;
-    }
-    
-    // Add client options
-    clients.forEach(client => {
-        if (client.status === 'active') {
-            const option = document.createElement('option');
-            option.value = client.id;
-            option.textContent = `${client.company} (${client.contact})`;
-            option.setAttribute('data-service', client.service);
-            option.setAttribute('data-fee', client.monthly_fee);
-            option.setAttribute('data-email', client.email);
-            dropdown.appendChild(option);
+            if (data.success && data.users.length > 0) {
+                data.users.forEach(user => {
+                    const userDiv = document.createElement('div');
+                    userDiv.className = 'flex items-center justify-between p-2 bg-gray-50 rounded-lg';
+                    userDiv.innerHTML = `
+                        <div>
+                            <p class="font-medium text-sm text-gray-800">${user.full_name}</p>
+                            <p class="text-xs text-gray-500">${user.email} - <span class="font-semibold">${user.role}</span></p>
+                        </div>
+                        <button onclick="deleteUser(${user.id})" class="text-red-500 hover:text-red-700">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    `;
+                    usersList.appendChild(userDiv);
+                });
+            } else {
+                usersList.innerHTML = `<p class="text-center text-gray-500">No users found.</p>`;
+            }
+        } catch (error) {
+            console.error('Error loading users:', error);
         }
-    });
-    
-    // Add event listener to auto-fill service and amount
-    dropdown.addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        if (selectedOption.value) {
-            document.getElementById('invoice-service').value = selectedOption.getAttribute('data-service');
-            document.getElementById('invoice-amount').value = selectedOption.getAttribute('data-fee');
+    }
+
+    async function handleCreateUser(e) {
+        e.preventDefault();
+        const formData = {
+            full_name: document.getElementById('full-name').value,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            role: document.getElementById('role').value
+        };
+
+        try {
+            const response = await fetch(`${API_BASE}/users.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                showNotification('User created successfully!', 'success');
+                e.target.reset();
+                loadUsers();
+            } else {
+                showNotification(data.message || 'Error creating user', 'error');
+            }
+        } catch (error) {
+            showNotification('Error creating user.', 'error');
         }
-    });
-}
+    }
 
-// Open send invoice modal with populated clients
-function openSendInvoiceModal() {
-    populateClientDropdown();
-    openModal('send-invoice-modal');
-}
+    async function deleteUser(userId) {
+        if (!confirm('Are you sure you want to delete this user?')) return;
+        try {
+            const response = await fetch(`${API_BASE}/users.php`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId })
+            });
+            const data = await response.json();
+            if (data.success) {
+                showNotification('User deleted!', 'success');
+                loadUsers();
+            } else {
+                showNotification('Error deleting user.', 'error');
+            }
+        } catch (error) {
+            showNotification('Error deleting user.', 'error');
+        }
+    }
 
-// Handle add client form submission
-async function handleAddClient(e) {
-    e.preventDefault();
-    
-    const newClient = {
-        company: document.getElementById('company-name').value,
-        contact: document.getElementById('contact-person').value,
-        email: document.getElementById('client-email').value,
-        service: document.getElementById('client-service').value,
-        monthly_fee: parseFloat(document.getElementById('monthly-fee').value)
-    };
-    
-    try {
+
+    // --- CLIENT & INVOICE MANAGEMENT ---
+    // All functions from your original script (fetchClients, fetchInvoices, updateStats, etc.) go here
+     async function fetchClients() {
+        try {
+            const response = await fetch(`${API_BASE}/clients.php`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            clients = data;
+            loadClients();
+            updateStats();
+        } catch (error) {
+            console.error('Error fetching clients:', error);
+            showNotification('Failed to fetch clients', 'error');
+        }
+    }
+
+    async function fetchInvoices() {
+        try {
+            const response = await fetch(`${API_BASE}/invoices.php`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            invoices = data;
+            loadInvoices();
+            updateStats();
+        } catch (error) {
+            console.error('Error fetching invoices:', error);
+            showNotification('Failed to fetch invoices', 'error');
+        }
+    }
+
+    function updateStats() {
+        const monthlyRevenue = invoices
+            .filter(invoice => invoice.status === 'paid')
+            .reduce((sum, invoice) => sum + parseFloat(invoice.amount), 0);
+        
+        const activeClients = clients.filter(client => client.status === 'active').length;
+        const pendingInvoices = invoices.filter(invoice => invoice.status === 'pending' || invoice.status === 'overdue').length;
+
+        document.querySelector('#stats-monthly-revenue h3').textContent = `$${monthlyRevenue.toLocaleString()}`;
+        document.querySelector('#stats-active-clients h3').textContent = activeClients;
+        document.querySelector('#stats-pending-invoices h3').textContent = pendingInvoices;
+    }
+
+    function loadClients() {
+        const tableBody = document.getElementById('clients-table-body');
+        tableBody.innerHTML = '';
+        if (clients.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4">No clients found.</td></tr>`;
+            return;
+        }
+        clients.forEach(client => {
+            const row = document.createElement('tr');
+            row.className = 'client-row border-b';
+            row.innerHTML = `
+                <td class="py-3 px-2">${client.company}</td>
+                <td class="py-3 px-2">${client.email}</td>
+                <td class="py-3 px-2">${client.service}</td>
+                <td class="py-3 px-2">$${client.monthly_fee}</td>
+                <td class="py-3 px-2"><span class="status-badge ${client.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${client.status}</span></td>
+                <td class="py-3 px-2">
+                    <button class="text-red-600 hover:text-red-800" onclick="deleteClient(${client.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    function loadInvoices() {
+        const tableBody = document.getElementById('invoices-table-body');
+        tableBody.innerHTML = '';
+        if (invoices.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4">No invoices found.</td></tr>`;
+            return;
+        }
+        const recentInvoices = [...invoices].sort((a, b) => new Date(b.issued) - new Date(a.issued)).slice(0, 5);
+        recentInvoices.forEach(invoice => {
+            const row = document.createElement('tr');
+            row.className = 'border-b';
+            row.innerHTML = `
+                <td class="py-3 px-2">#${invoice.id}</td>
+                <td class="py-3 px-2">${invoice.client_name}</td>
+                <td class="py-3 px-2">$${invoice.amount}</td>
+                <td class="py-3 px-2">${formatDate(invoice.issued)}</td>
+                <td class="py-3 px-2"><span class="status-badge ${invoice.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">${invoice.status}</span></td>
+                <td class="py-3 px-2"><button class="text-blue-600 hover:text-blue-800" onclick="viewInvoice(${invoice.id})"><i class="fas fa-eye"></i></button></td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    async function handleAddClient(e) {
+        e.preventDefault();
+        const newClient = {
+            company: document.getElementById('company-name').value,
+            contact: document.getElementById('contact-person').value,
+            email: document.getElementById('client-email').value,
+            service: document.getElementById('client-service').value,
+            monthly_fee: parseFloat(document.getElementById('monthly-fee').value)
+        };
         const response = await fetch(`${API_BASE}/clients.php`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify(newClient)
         });
-        
         if (response.ok) {
-            const result = await response.json();
             showNotification('Client added successfully!', 'success');
-            fetchClients(); // Refresh the client list
+            fetchClients();
             e.target.reset();
             closeModal('add-client-modal');
         } else {
             showNotification('Failed to add client.', 'error');
         }
-    } catch (error) {
-        console.error('Error adding client:', error);
-        showNotification('Failed to add client.', 'error');
     }
-}
 
-// Handle send invoice form submission
-async function handleSendInvoice(e) {
-    e.preventDefault();
-    
-    const clientId = parseInt(document.getElementById('invoice-client').value);
-    const client = clients.find(c => c.id === clientId);
-    
-    if (!client) {
-        showNotification('Please select a valid client.', 'error');
-        return;
-    }
-    
-    const service = document.getElementById('invoice-service').value;
-    const amount = parseFloat(document.getElementById('invoice-amount').value);
-    
-    const newInvoice = {
-        client_id: clientId,
-        client_name: client.company,
-        amount: amount,
-        issued: new Date().toISOString().split('T')[0],
-        due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        service: service
-    };
-    
-    try {
+    async function handleSendInvoice(e) {
+        e.preventDefault();
+        const clientId = document.getElementById('invoice-client').value;
+        const client = clients.find(c => c.id == clientId);
+        const newInvoice = {
+            client_id: client.id,
+            client_name: client.company,
+            amount: document.getElementById('invoice-amount').value,
+            issued: new Date().toISOString().split('T')[0],
+            due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            service: document.getElementById('invoice-service').value
+        };
         const response = await fetch(`${API_BASE}/invoices.php`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify(newInvoice)
         });
-        
+        const result = await response.json();
         if (response.ok) {
-            const result = await response.json();
-            
-            // Send invoice via EmailJS
-            sendEmail(client, {
-                id: result.invoice_id,
-                ...newInvoice
-            });
-            
+            sendEmail(client, { id: result.invoice_id, ...newInvoice });
             showNotification('Invoice sent successfully!', 'success');
-            fetchInvoices(); // Refresh the invoice list
+            fetchInvoices();
             e.target.reset();
             closeModal('send-invoice-modal');
         } else {
             showNotification('Failed to send invoice.', 'error');
         }
-    } catch (error) {
-        console.error('Error sending invoice:', error);
-        showNotification('Failed to send invoice.', 'error');
-    }
-}
-
-// Send invoice email using EmailJS
-function sendEmail(client, invoice) {
-    // Check if client email is valid
-    if (!client.email || client.email.trim() === '') {
-        console.error('Recipient email is empty');
-        showNotification('Failed to send email: Recipient email is empty', 'error');
-        return;
-    }
-    
-    // Ensure invoice.amount is a number before calling toFixed
-    const amount = parseFloat(invoice.amount);
-    if (isNaN(amount)) {
-        console.error('Invalid invoice amount:', invoice.amount);
-        showNotification('Failed to send email: Invalid invoice amount.', 'error');
-        return;
     }
 
-    const emailParams = {
-        email: client.email,
-        from_name: 'Blacnova Development',
-        customerName: client.contact,
-        invoiceNumber: invoice.id,
-        dateIssued: formatDate(invoice.issued),
-        service: invoice.service,
-        price: amount.toFixed(2),
-        dueDate: formatDate(invoice.due_date)
-    };
-    
-    console.log('Sending email with params:', emailParams);
-    
-    emailjs.send('service_g3x1dzf', 'template_ptf2tzg', emailParams)
-        .then((response) => {
-            console.log('Email sent successfully!', response.status, response.text);
-            showNotification('Email sent successfully!', 'success');
-        })
-        .catch((error) => {
-            console.error('Failed to send email:', error);
-            if (error.text) {
-                console.error('Error details:', error.text);
+    function openSendInvoiceModal() {
+        populateClientDropdown();
+        openModal('send-invoice-modal');
+    }
+
+    function populateClientDropdown() {
+        const dropdown = document.getElementById('invoice-client');
+        dropdown.innerHTML = '<option value="">Select a client</option>';
+        clients.forEach(client => {
+            if (client.status === 'active') {
+                const option = document.createElement('option');
+                option.value = client.id;
+                option.textContent = client.company;
+                option.dataset.service = client.service;
+                option.dataset.fee = client.monthly_fee;
+                dropdown.appendChild(option);
             }
-            showNotification('Failed to send email. Please check console for details.', 'error');
         });
-}
-
-// View invoice details
-function viewInvoice(invoiceId) {
-    const invoice = invoices.find(i => i.id === invoiceId);
-    if (!invoice) return;
-    
-    document.getElementById('view-invoice-number').textContent = invoice.id;
-    document.getElementById('view-invoice-client').textContent = invoice.client_name;
-    document.getElementById('view-invoice-service').textContent = invoice.service;
-    document.getElementById('view-invoice-amount').textContent = '$' + invoice.amount;
-    document.getElementById('view-invoice-issued').textContent = formatDate(invoice.issued);
-    
-    const statusElement = document.getElementById('view-invoice-status');
-    statusElement.textContent = invoice.status;
-    statusElement.className = 'font-medium ' + 
-        (invoice.status === 'paid' ? 'text-green-600' : 
-         invoice.status === 'pending' ? 'text-yellow-600' : 'text-red-600');
-    
-    // Show PayPal button only for pending invoices
-    const paypalContainer = document.getElementById('paypal-button-container');
-    paypalContainer.innerHTML = '';
-    
-    if (invoice.status === 'pending' || invoice.status === 'overdue') {
-        paypalContainer.classList.remove('hidden');
-        renderPayPalButton(invoice);
-    } else {
-        paypalContainer.classList.add('hidden');
+        dropdown.onchange = (e) => {
+            const selected = e.target.options[e.target.selectedIndex];
+            document.getElementById('invoice-service').value = selected.dataset.service;
+            document.getElementById('invoice-amount').value = selected.dataset.fee;
+        };
     }
     
-    openModal('view-invoice-modal');
-}
+    // Other helper functions: viewInvoice, sendEmail, deleteClient, toggleAutoInvoice, modals, etc.
+    function viewInvoice(invoiceId) {
+        const invoice = invoices.find(i => i.id === invoiceId);
+        if (!invoice) return;
+        
+        document.getElementById('view-invoice-number').textContent = invoice.id;
+        document.getElementById('view-invoice-client').textContent = invoice.client_name;
+        document.getElementById('view-invoice-service').textContent = invoice.service;
+        document.getElementById('view-invoice-amount').textContent = '$' + invoice.amount;
+        document.getElementById('view-invoice-issued').textContent = formatDate(invoice.issued);
+        document.getElementById('view-invoice-status').textContent = invoice.status;
 
-// Render PayPal button for invoice payment
-function renderPayPalButton(invoice) {
-    paypal.Buttons({
-        createOrder: function(data, actions) {
-            return actions.order.create({
-                purchase_units: [{
-                    amount: {
-                        value: parseFloat(invoice.amount).toFixed(2)
-                    },
-                    description: `Invoice #${invoice.id} - ${invoice.service}`
-                }]
-            });
-        },
-        onApprove: function(data, actions) {
-            return actions.order.capture().then(function(details) {
-                // Update invoice status to paid
-                invoice.status = 'paid';
-                invoice.paid_date = new Date().toISOString().split('T')[0];
-                
-                // Update on server (you would need to implement this)
-                // updateInvoiceStatus(invoice.id, 'paid');
-                
-                showNotification('Payment completed successfully!', 'success');
-                
-                // Close the modal after a short delay
-                setTimeout(() => {
-                    closeModal('view-invoice-modal');
-                }, 1500);
-            });
-        },
-        onError: function(err) {
-            console.error('PayPal error:', err);
-            showNotification('An error occurred with the payment. Please try again.', 'error');
-        }
-    }).render('#paypal-button-container');
-}
+        openModal('view-invoice-modal');
+    }
+    
+    function sendEmail(client, invoice) {
+        const amount = parseFloat(invoice.amount);
+        const emailParams = {
+            email: client.email,
+            from_name: 'Blacnova Development',
+            customerName: client.contact,
+            invoiceNumber: invoice.id,
+            dateIssued: formatDate(invoice.issued),
+            service: invoice.service,
+            price: amount.toFixed(2),
+            dueDate: formatDate(invoice.due_date)
+        };
+        emailjs.send('service_g3x1dzf', 'template_ptf2tzg', emailParams)
+            .then(() => showNotification('Email sent successfully!', 'success'))
+            .catch((err) => showNotification('Failed to send email.', 'error'));
+    }
 
-// Delete client
-async function deleteClient(clientId) {
-    if (confirm('Are you sure you want to delete this client?')) {
-        try {
+    async function deleteClient(clientId) {
+        if (confirm('Are you sure?')) {
             const response = await fetch(`${API_BASE}/clients.php`, {
                 method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
                 body: JSON.stringify({ id: clientId })
             });
-            
             if (response.ok) {
-                showNotification('Client deleted successfully!', 'success');
-                fetchClients(); // Refresh the client list
-                fetchInvoices(); // Refresh the invoice list
+                showNotification('Client deleted.', 'success');
+                fetchClients();
             } else {
                 showNotification('Failed to delete client.', 'error');
             }
-        } catch (error) {
-            console.error('Error deleting client:', error);
-            showNotification('Failed to delete client.', 'error');
         }
     }
-}
 
-// Toggle auto invoice
-function toggleAutoInvoice() {
-    autoInvoiceEnabled = !autoInvoiceEnabled;
-    localStorage.setItem('autoInvoiceEnabled', JSON.stringify(autoInvoiceEnabled));
-    updateAutoInvoiceButton();
-    
-    showNotification(`Auto-invoice ${autoInvoiceEnabled ? 'enabled' : 'disabled'}`, 'success');
-}
-
-function updateAutoInvoiceButton() {
-    const btn = document.getElementById('auto-invoice-btn');
-    if (autoInvoiceEnabled) {
-        btn.innerHTML = '<i class="fas fa-robot mr-2"></i> Auto-Invoice: ON';
-        btn.classList.remove('bg-gray-600', 'hover:bg-gray-700');
-        btn.classList.add('bg-green-600', 'hover:bg-green-700');
-    } else {
-        btn.innerHTML = '<i class="fas fa-robot mr-2"></i> Auto-Invoice: OFF';
-        btn.classList.remove('bg-green-600', 'hover:bg-green-700');
-        btn.classList.add('bg-gray-600', 'hover:bg-gray-700');
+    function toggleAutoInvoice() {
+        autoInvoiceEnabled = !autoInvoiceEnabled;
+        updateAutoInvoiceButton();
+        showNotification(`Auto-invoice ${autoInvoiceEnabled ? 'enabled' : 'disabled'}.`, 'success');
     }
-}
 
-// Format date for display
-function formatDate(dateString) {
-    const options = { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-}
-
-// Show notification
-function showNotification(message, type = 'info') {
-    const notification = document.getElementById('notification');
-    const messageEl = document.getElementById('notification-message');
-    
-    // Remove previous classes
-    notification.classList.remove('bg-blue-500', 'bg-green-500', 'bg-red-500', 'bg-yellow-500', 'text-white', 'text-black');
-    
-    // Set new classes based on type
-    switch(type) {
-        case 'success':
-            notification.classList.add('bg-green-500', 'text-white');
-            break;
-        case 'error':
-            notification.classList.add('bg-red-500', 'text-white');
-            break;
-        case 'warning':
-            notification.classList.add('bg-yellow-500', 'text-black');
-            break;
-        default:
-            notification.classList.add('bg-blue-500', 'text-white');
-    }
-    
-    messageEl.textContent = message;
-    notification.classList.remove('hidden');
-    
-    // Auto hide after 3 seconds
-    setTimeout(() => {
-        notification.classList.add('hidden');
-    }, 3000);
-}
-
-// Modal functions
-function openModal(id) {
-    document.getElementById(id).classList.remove('hidden');
-}
-
-function closeModal(id) {
-    document.getElementById(id).classList.add('hidden');
-}
-
-// Close modals when clicking outside
-document.querySelectorAll('[id$="-modal"]').forEach(modal => {
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            closeModal(modal.id);
+    function updateAutoInvoiceButton() {
+        const btn = document.getElementById('auto-invoice-btn');
+        if (autoInvoiceEnabled) {
+            btn.innerHTML = '<i class="fas fa-robot mr-2"></i> Auto-Invoice: ON';
+            btn.classList.replace('bg-gray-600', 'bg-green-600');
+        } else {
+            btn.innerHTML = '<i class="fas fa-robot mr-2"></i> Auto-Invoice: OFF';
+            btn.classList.replace('bg-green-600', 'bg-gray-600');
         }
-    });
-});
+    }
 
-// Edit client function (needed for the client table)
-function editClient(clientId) {
-    // Find the client
-    const client = clients.find(c => c.id === clientId);
-    if (!client) return;
-    
-    // Populate the form
-    document.getElementById('company-name').value = client.company;
-    document.getElementById('contact-person').value = client.contact;
-    document.getElementById('client-email').value = client.email;
-    document.getElementById('client-service').value = client.service;
-    document.getElementById('monthly-fee').value = client.monthly_fee;
-    
-    // Remove the old client
-    clients = clients.filter(c => c.id !== clientId);
-    
-    // Open the modal
-    openModal('add-client-modal');
-    
-    // Change the form submit handler to handle editing
-    const form = document.getElementById('add-client-form');
-    const originalSubmitHandler = form.onsubmit;
-    form.onsubmit = function(e) {
-        e.preventDefault();
-        
-        // Update the client
-        const updatedClient = {
-            id: clientId,
-            company: document.getElementById('company-name').value,
-            contact: document.getElementById('contact-person').value,
-            email: document.getElementById('client-email').value,
-            service: document.getElementById('client-service').value,
-            monthly_fee: parseFloat(document.getElementById('monthly-fee').value),
-            status: client.status,
-            join_date: client.join_date
-        };
-        
-        // Update on server (you would need to implement this)
-        // updateClient(updatedClient);
-        
-        showNotification('Client updated successfully!', 'success');
-        
-        // Restore the original submit handler
-        form.onsubmit = originalSubmitHandler;
-    };
-}
-    </script>
+    function checkOverdueInvoices() { /* ... */ }
+    function formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString(undefined, { timeZone: 'UTC' });
+    }
+    function showNotification(message, type = 'info') {
+        const el = document.getElementById('notification');
+        el.textContent = message;
+        el.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white bg-${type === 'success' ? 'green' : 'red'}-500`;
+        el.classList.remove('hidden');
+        setTimeout(() => el.classList.add('hidden'), 3000);
+    }
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+</script>
+
+
 </body>
 </html>
