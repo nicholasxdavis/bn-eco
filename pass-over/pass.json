@@ -1,0 +1,21 @@
+{
+  "Client": {
+    "name": "Client",
+    "email": "client@bn.net",
+    "username": "client"
+  }
+}
+{
+  "Nicholas": {
+    "name": "Nicholas",
+    "email": "nic@blacnova.net",
+    "username": "nic"
+  }
+}
+{
+  "Admin": {
+    "name": "Admin User",
+    "email": "admin@blacnova.com",
+    "username": "admin"
+  }
+}
