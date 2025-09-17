@@ -4,407 +4,272 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blacnova - Client Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    <script src="https://www.paypal.com/sdk/js?client-id=AU6fuEjjnHJC-tnPDk4dMedZSTV7NulDC-qED1GXztyh_gYhP_nUwxmmbsLs2JYUM0QnS-M_cFYdZUR1&currency=USD"></script>
+    <link rel="stylesheet" type="text/css" href="dashboard.css">
     <script>
         // Initialize EmailJS
         (function() {
             emailjs.init("mGAM0CatzjBKJTVe9");
         })();
         
-        // Tailwind config
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#d4611c',
-                        secondary: '#171717',
-                        accent: '#df722d',
-                    }
-                }
-            }
-        }
-        
         // API base URL
         const API_BASE = './api';
     </script>
-    <style>
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f8fafc;
-        }
-        
-        .card {
-            transition: all 0.3s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        
-        .client-row:hover {
-            background-color: #f1f5f9;
-        }
-        
-        #notification {
-            transition: all 0.3s ease-in-out;
-            z-index: 1000;
-        }
-        
-        #paypal-button-container {
-            margin-top: 15px;
-            text-align: center;
-        }
-        
-        .status-badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        /* Full Screen Auth Overlay */
-        #auth-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            font-family: 'Poppins', sans-serif;
-        }
-    </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 min-h-screen antialiased">
 
-    <div id="auth-overlay">
-        <div style="background: #111; padding: 2rem; border-radius: 20px; width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-            <div style="text-align: center; margin-bottom: 2rem;">
-                <img src="https://www.blacnova.net/img/bn.png" alt="Blacnova Logo" style="width: 60px; height: 60px; margin: 0 auto 1rem;">
-                <h2 style="color: #fff; margin: 0; font-weight: 600;">Dashboard Access</h2>
-                <p style="color: #888; margin: 0.5rem 0 0;">Sign in to continue</p>
+    <div id="auth-overlay" class="fixed inset-0 bg-black flex items-center justify-center z-50">
+        <div class="bg-[#111] p-8 rounded-2xl w-full max-w-sm shadow-lg">
+            <div class="text-center mb-8">
+                <img src="https://www.blacnova.net/img/bn.png" alt="Blacnova Logo" class="w-16 h-16 mx-auto mb-4">
+                <h2 class="text-white text-2xl font-bold">Dashboard Access</h2>
+                <p class="text-gray-400 mt-2">Sign in to continue</p>
             </div>
             
             <form id="login-form">
-                <div style="margin-bottom: 1.5rem;">
-                    <label style="display: block; color: #ddd; margin-bottom: 0.5rem; font-size: 0.9rem;">Email</label>
-                    <input type="email" id="login-email" required style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid #333; background: #222; color: #fff; font-size: 1rem; box-sizing: border-box;">
+                <div class="mb-4">
+                    <label class="block text-gray-300 text-sm font-medium mb-2">Email</label>
+                    <input type="email" id="login-email" required class="w-full px-4 py-3 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary">
                 </div>
                 
-                <div style="margin-bottom: 1.5rem;">
-                    <label style="display: block; color: #ddd; margin-bottom: 0.5rem; font-size: 0.9rem;">Password</label>
-                    <input type="password" id="login-password" required style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid #333; background: #222; color: #fff; font-size: 1rem; box-sizing: border-box;">
+                <div class="mb-6">
+                    <label class="block text-gray-300 text-sm font-medium mb-2">Password</label>
+                    <input type="password" id="login-password" required class="w-full px-4 py-3 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary">
                 </div>
                 
-                <button type="submit" style="width: 100%; padding: 12px; border-radius: 12px; border: none; background: #d4611c; color: white; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
+                <div class="flex items-center justify-between mb-6">
+                    <label class="flex items-center text-gray-400">
+                        <input type="checkbox" id="remember-me" class="h-4 w-4 rounded bg-gray-800 border-gray-600 text-primary focus:ring-primary">
+                        <span class="ml-2 text-sm">Remember me</span>
+                    </label>
+                    <a href="#" class="text-sm text-primary hover:underline">Forgot password?</a>
+                </div>
+                
+                <button type="submit" class="w-full py-3 rounded-lg bg-primary text-white font-semibold hover:bg-primary-dark transition-all duration-300">
                     Sign In
                 </button>
                 
-                <p id="login-error" style="color: #ff4444; text-align: center; margin: 1rem 0 0; display: none;">Invalid credentials</p>
+                <p id="login-error" class="text-red-500 text-center mt-4 hidden">Invalid credentials</p>
             </form>
         </div>
     </div>
 
-    <div id="dashboard-content" class="hidden">
-        <header class="bg-white shadow-sm">
-            <div class="flex justify-between items-center p-4 max-w-7xl mx-auto">
-                <div class="flex items-center">
-                    <img src="https://www.blacnova.net/img/bn.png" alt="Blacnova Development" class="h-8 mr-2">
-                    <h1 class="text-xl font-semibold text-gray-800">BN-Client Dashboard</h1>
-                </div>
-                <div class="flex items-center">
-                    <div id="user-avatar" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center">
-                        <span>AD</span>
-                    </div>
-                </div>
+    <div id="dashboard-content" class="hidden flex h-screen">
+        <div class="w-64 bg-black border-r border-white/10 p-4 flex-col h-screen hidden md:flex">
+            <div class="flex items-center space-x-3 mb-8">
+                <img src="https://www.blacnova.net/img/bn.png" alt="Blacnova Logo" class="w-10 h-10">
+                <h1 class="text-xl font-medium text-white">BN-Client</h1>
             </div>
-        </header>
 
-        <div id="notification" class="fixed top-4 right-4 p-4 rounded-lg shadow-lg hidden">
-            <span id="notification-message"></span>
+            <nav class="space-y-1">
+                <div class="nav-item active-nav p-3 rounded-xl flex items-center space-x-3 text-white">
+                    <i class="fas fa-tachometer-alt w-5 text-center"></i>
+                    <span>Dashboard</span>
+                </div>
+            </nav>
+
+            <footer class="mt-auto text-center text-xs text-white/40 pt-6">
+                © 2025 Blacnova Development
+            </footer>
         </div>
 
-        <div class="max-w-7xl mx-auto p-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div id="stats-monthly-revenue" class="card bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-gray-500">Monthly Revenue</p>
-                            <h3 class="text-2xl font-bold text-gray-800">$0</h3>
-                        </div>
-                        <div class="bg-orange-100 p-3 rounded-full">
-                            <i class="fas fa-dollar-sign text-primary text-xl"></i>
-                        </div>
+        <div class="flex-1 overflow-y-auto">
+            <header class="hidden md:flex justify-between items-center bg-light-bg border-b border-gray-200 p-4">
+                 <h1 id="page-title" class="text-2xl font-medium">Dashboard</h1>
+                <div class="flex items-center space-x-4">
+                    <div id="user-info" class="text-right">
+                        <p class="font-medium">User</p>
+                        <p class="text-sm text-gray-500">client@example.com</p>
                     </div>
-                    <p class="text-gray-500 text-sm mt-2"><i class="fas fa-minus"></i> No previous data</p>
-                </div>
-                <div id="stats-active-clients" class="card bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-gray-500">Active Clients</p>
-                            <h3 class="text-2xl font-bold text-gray-800">0</h3>
-                        </div>
-                        <div class="bg-blue-100 p-3 rounded-full">
-                            <i class="fas fa-users text-blue-500 text-xl"></i>
-                        </div>
+                    <div id="user-avatar" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-semibold">
+                        <span>U</span>
                     </div>
-                    <p class="text-gray-500 text-sm mt-2"><i class="fas fa-users"></i> No clients yet</p>
                 </div>
-                <div id="stats-pending-invoices" class="card bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-gray-500">Pending Invoices</p>
-                            <h3 class="text-2xl font-bold text-gray-800">0</h3>
-                        </div>
-                        <div class="bg-yellow-100 p-3 rounded-full">
-                            <i class="fas fa-file-invoice text-yellow-500 text-xl"></i>
-                        </div>
-                    </div>
-                    <p class="text-gray-500 text-sm mt-2"><i class="fas fa-file-invoice"></i> No invoices yet</p>
-                </div>
-                <div id="stats-auto-invoice" class="card bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-gray-500">Auto-Invoice Status</p>
-                            <h3 class="text-2xl font-bold text-gray-800">Active</h3>
-                        </div>
-                        <div class="bg-green-100 p-3 rounded-full">
-                            <i class="fas fa-check-circle text-green-500 text-xl"></i>
-                        </div>
-                    </div>
-                    <p class="text-gray-500 text-sm mt-2">Next run: 1st of next month</p>
-                </div>
-            </div>
+            </header>
 
-            <div class="flex flex-wrap gap-4 mb-8">
-                <button onclick="openModal('add-client-modal')" class="bg-primary hover:bg-accent text-white px-6 py-3 rounded-lg flex items-center">
-                    <i class="fas fa-user-plus mr-2"></i> Add Client
-                </button>
-                <button onclick="openSendInvoiceModal()" class="bg-primary hover:bg-accent text-white px-6 py-3 rounded-lg flex items-center">
-                    <i class="fas fa-paper-plane mr-2"></i> Send Invoice
-                </button>
-                <button onclick="toggleAutoInvoice()" id="auto-invoice-btn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center">
-                    <i class="fas fa-robot mr-2"></i> Auto-Invoice: ON
-                </button>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">Clients</h2>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="text-left border-b">
-                                <th class="pb-2">Name</th>
-                                <th class="pb-2">Email</th>
-                                <th class="pb-2">Service</th>
-                                <th class="pb-2">Monthly Fee</th>
-                                <th class="pb-2">Status</th>
-                                <th class="pb-2">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="clients-table-body"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Invoices</h2>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                         <thead>
-                            <tr class="text-left border-b">
-                                <th class="pb-2">Invoice #</th>
-                                <th class="pb-2">Client</th>
-                                <th class="pb-2">Amount</th>
-                                <th class="pb-2">Issued</th>
-                                <th class="pb-2">Status</th>
-                                <th class="pb-2">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="invoices-table-body"></tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <div class="bg-white rounded-xl shadow-sm p-6">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">User Management</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <h3 class="text-lg font-medium mb-2 text-gray-700">Create New User</h3>
-                        <form id="create-user-form" class="space-y-4">
-                            <input type="text" id="full-name" placeholder="Full Name" class="w-full px-4 py-2 border rounded-lg" required>
-                            <input type="email" id="email" placeholder="Email" class="w-full px-4 py-2 border rounded-lg" required>
-                            <input type="password" id="password" placeholder="Password" class="w-full px-4 py-2 border rounded-lg" required>
-                            <select id="role" class="w-full px-4 py-2 border rounded-lg">
-                                <option value="viewer">Viewer</option>
-                                <option value="editor">Editor</option>
-                                <option value="admin">Admin</option>
-                            </select>
-                            <button type="submit" class="bg-secondary hover:bg-gray-800 text-white px-4 py-2 rounded-lg w-full">Create User</button>
-                        </form>
-                    </div>
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                             <h3 class="text-lg font-medium text-gray-700">Existing Users</h3>
-                             <button id="refresh-users" class="text-gray-500 hover:text-primary"><i class="fas fa-sync-alt"></i></button>
+            <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div id="stats-monthly-revenue" class="stat-card glass-card p-6 rounded-2xl">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Monthly Revenue</p>
+                                <h3 class="text-2xl font-bold text-gray-800">$0</h3>
+                            </div>
+                            <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
                         </div>
-                        <div id="users-list" class="space-y-2 max-h-60 overflow-y-auto pr-2"></div>
+                    </div>
+                    <div id="stats-active-clients" class="stat-card glass-card p-6 rounded-2xl">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Active Clients</p>
+                                <h3 class="text-2xl font-bold text-gray-800">0</h3>
+                            </div>
+                            <div class="stat-icon"><i class="fas fa-users"></i></div>
+                        </div>
+                    </div>
+                    <div id="stats-pending-invoices" class="stat-card glass-card p-6 rounded-2xl">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Pending Invoices</p>
+                                <h3 class="text-2xl font-bold text-gray-800">0</h3>
+                            </div>
+                            <div class="stat-icon"><i class="fas fa-file-invoice"></i></div>
+                        </div>
+                    </div>
+                    <div id="stats-auto-invoice" class="stat-card glass-card p-6 rounded-2xl">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Auto-Invoice</p>
+                                <h3 class="text-2xl font-bold text-gray-800">Active</h3>
+                            </div>
+                           <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
+                <div class="flex flex-wrap gap-4 mb-8">
+                    <button onclick="openModal('add-client-modal')" class="btn-primary px-6 py-3 rounded-lg flex items-center">
+                        <i class="fas fa-user-plus mr-2"></i> Add Client
+                    </button>
+                    <button onclick="openSendInvoiceModal()" class="btn-primary px-6 py-3 rounded-lg flex items-center">
+                        <i class="fas fa-paper-plane mr-2"></i> Send Invoice
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 glass-card p-6 rounded-2xl">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Clients</h2>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="text-left border-b">
+                                        <th class="pb-3 font-medium">Name</th>
+                                        <th class="pb-3 font-medium">Email</th>
+                                        <th class="pb-3 font-medium">Service</th>
+                                        <th class="pb-3 font-medium">Fee</th>
+                                        <th class="pb-3 font-medium">Status</th>
+                                        <th class="pb-3 font-medium text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="clients-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Invoices</h2>
+                        <div id="invoices-table-body" class="space-y-4"></div>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
 
-    <div id="add-client-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-xl p-6 w-full max-w-md">
-            <h3 class="text-xl font-semibold mb-4">Add New Client</h3>
+    <div id="add-client-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="text-xl font-medium">Add New Client</h3>
+                <button onclick="closeModal('add-client-modal')" class="text-gray-500 hover:text-primary"><i class="fas fa-times"></i></button>
+            </div>
             <form id="add-client-form">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
-                        <input type="text" id="company-name" class="w-full px-4 py-2 border rounded-lg" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Contact Person</label>
-                        <input type="text" id="contact-person" class="w-full px-4 py-2 border rounded-lg" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input type="email" id="client-email" class="w-full px-4 py-2 border rounded-lg" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Service</label>
-                        <select id="client-service" class="w-full px-4 py-2 border rounded-lg" required>
-                            <option value="">Select a service</option>
-                            <option value="Web Development">Web Development</option>
-                            <option value="SEO Optimization">SEO Optimization</option>
-                            <option value="Cloud Solutions">Cloud Solutions</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Monthly Fee ($)</label>
-                        <input type="number" id="monthly-fee" class="w-full px-4 py-2 border rounded-lg" required min="0" step="0.01">
-                    </div>
+                <div class="modal-body space-y-4">
+                    <input type="text" id="company-name" placeholder="Company Name" class="w-full px-4 py-2 border rounded-lg" required>
+                    <input type="text" id="contact-person" placeholder="Contact Person" class="w-full px-4 py-2 border rounded-lg" required>
+                    <input type="email" id="client-email" placeholder="Email" class="w-full px-4 py-2 border rounded-lg" required>
+                    <select id="client-service" class="w-full px-4 py-2 border rounded-lg" required>
+                        <option value="">Select a service</option>
+                        <option value="Web Development">Web Development</option>
+                        <option value="SEO Optimization">SEO Optimization</option>
+                        <option value="Cloud Solutions">Cloud Solutions</option>
+                    </select>
+                    <input type="number" id="monthly-fee" placeholder="Monthly Fee ($)" class="w-full px-4 py-2 border rounded-lg" required min="0" step="0.01">
                 </div>
-                <div class="flex justify-end gap-3 mt-6">
-                    <button type="button" onclick="closeModal('add-client-modal')" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                    <button type="submit" class="bg-primary hover:bg-accent text-white px-4 py-2 rounded-lg">Add Client</button>
+                <div class="modal-footer">
+                    <button type="button" onclick="closeModal('add-client-modal')" class="btn-secondary px-4 py-2 rounded-lg">Cancel</button>
+                    <button type="submit" class="btn-primary px-4 py-2 rounded-lg">Add Client</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="send-invoice-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-xl p-6 w-full max-w-md">
-            <h3 class="text-xl font-semibold mb-4">Send Invoice</h3>
+    <div id="send-invoice-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="text-xl font-medium">Send Invoice</h3>
+                <button onclick="closeModal('send-invoice-modal')" class="text-gray-500 hover:text-primary"><i class="fas fa-times"></i></button>
+            </div>
             <form id="send-invoice-form">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Select Client</label>
-                        <select id="invoice-client" class="w-full px-4 py-2 border rounded-lg" required>
-                            <option value="">Select a client</option>
-                            </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Service</label>
-                        <input type="text" id="invoice-service" class="w-full px-4 py-2 border rounded-lg" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Amount ($)</label>
-                        <input type="number" id="invoice-amount" class="w-full px-4 py-2 border rounded-lg" required min="0" step="0.01">
-                    </div>
+                <div class="modal-body space-y-4">
+                    <select id="invoice-client" class="w-full px-4 py-2 border rounded-lg" required></select>
+                    <input type="text" id="invoice-service" placeholder="Service" class="w-full px-4 py-2 border rounded-lg" required>
+                    <input type="number" id="invoice-amount" placeholder="Amount ($)" class="w-full px-4 py-2 border rounded-lg" required min="0" step="0.01">
                 </div>
-                <div class="flex justify-end gap-3 mt-6">
-                    <button type="button" onclick="closeModal('send-invoice-modal')" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                    <button type="submit" class="bg-primary hover:bg-accent text-white px-4 py-2 rounded-lg">Send Invoice</button>
+                <div class="modal-footer">
+                    <button type="button" onclick="closeModal('send-invoice-modal')" class="btn-secondary px-4 py-2 rounded-lg">Cancel</button>
+                    <button type="submit" class="btn-primary px-4 py-2 rounded-lg">Send Invoice</button>
                 </div>
             </form>
-        </div>
-    </div>
-
-    <div id="view-invoice-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-xl p-6 w-full max-w-md">
-            <h3 class="text-xl font-semibold mb-4">Invoice Details</h3>
-            <div class="space-y-4">
-                <div>
-                    <p class="text-sm text-gray-500">Invoice #</p>
-                    <p id="view-invoice-number" class="font-medium"></p>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-500">Client</p>
-                    <p id="view-invoice-client" class="font-medium"></p>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-500">Service</p>
-                    <p id="view-invoice-service" class="font-medium"></p>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-500">Amount</p>
-                    <p id="view-invoice-amount" class="font-medium"></p>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-500">Issued</p>
-                    <p id="view-invoice-issued" class="font-medium"></p>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-500">Status</p>
-                    <p id="view-invoice-status" class="font-medium"></p>
-                </div>
-                <div id="paypal-button-container" class="hidden">
-                    </div>
-            </div>
-            <div class="flex justify-end gap-3 mt-6">
-                <button type="button" onclick="closeModal('view-invoice-modal')" class="px-4 py-2 text-gray-600 hover:text-gray-800">Close</button>
-            </div>
         </div>
     </div>
     
-  <script>
+    <div id="toast-notification"></div>
+
+    <script>
     let clients = [];
     let invoices = [];
-    let autoInvoiceEnabled = true;
 
-    // --- AUTH & USER MANAGEMENT ---
     document.addEventListener('DOMContentLoaded', function() {
+        const authToken = localStorage.getItem('blacnova_auth_token');
+        if (authToken) {
+            // If token exists, try to validate it with the server
+            // For simplicity here, we'll just show the dashboard
+            // In a real app, you'd verify the token server-side
+            document.getElementById('auth-overlay').style.display = 'none';
+            document.getElementById('dashboard-content').classList.remove('hidden');
+            const user = JSON.parse(localStorage.getItem('blacnova_user'));
+            if(user) {
+                updateUserInfo(user);
+            }
+            initializeApp();
+        }
+
         document.getElementById('login-form').addEventListener('submit', handleLogin);
-        document.getElementById('create-user-form').addEventListener('submit', handleCreateUser);
-        document.getElementById('refresh-users').addEventListener('click', loadUsers);
     });
 
     async function handleLogin(e) {
         e.preventDefault();
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
+        const rememberMe = document.getElementById('remember-me').checked;
         const errorElement = document.getElementById('login-error');
 
         try {
             const response = await fetch(`${API_BASE}/login.php`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ email, password, remember: rememberMe })
             });
             const data = await response.json();
 
             if (data.success) {
+                if (rememberMe) {
+                    localStorage.setItem('blacnova_auth_token', data.token);
+                    localStorage.setItem('blacnova_user', JSON.stringify(data.user));
+                } else {
+                    sessionStorage.setItem('blacnova_auth_token', data.token);
+                    sessionStorage.setItem('blacnova_user', JSON.stringify(data.user));
+                }
+
                 document.getElementById('auth-overlay').style.display = 'none';
                 document.getElementById('dashboard-content').classList.remove('hidden');
                 
-                // Set user avatar
-                const user = data.user;
-                const avatar = document.querySelector('#user-avatar span');
-                if (user.full_name) {
-                    avatar.textContent = user.full_name.match(/\b\w/g).join('').substring(0,2).toUpperCase();
-                }
-
-                // Initialize dashboard data
+                updateUserInfo(data.user);
                 initializeApp();
             } else {
                 errorElement.textContent = data.message || 'Invalid credentials';
@@ -417,127 +282,47 @@
         }
     }
 
+    function updateUserInfo(user) {
+        const avatar = document.querySelector('#user-avatar span');
+        const userInfo = document.getElementById('user-info');
+
+        if (user.full_name) {
+            avatar.textContent = user.full_name.match(/\b\w/g).join('').substring(0,2).toUpperCase();
+            userInfo.querySelector('p.font-medium').textContent = user.full_name;
+            userInfo.querySelector('p.text-sm').textContent = user.email;
+        }
+    }
+    
     function initializeApp() {
         fetchClients();
         fetchInvoices();
-        loadUsers(); // Load users for the admin panel
-        updateAutoInvoiceButton();
         document.getElementById('add-client-form').addEventListener('submit', handleAddClient);
         document.getElementById('send-invoice-form').addEventListener('submit', handleSendInvoice);
-        checkOverdueInvoices();
     }
     
-    async function loadUsers() {
-        try {
-            const response = await fetch(`${API_BASE}/users.php`);
-            const data = await response.json();
-            const usersList = document.getElementById('users-list');
-            usersList.innerHTML = '';
-
-            if (data.success && data.users.length > 0) {
-                data.users.forEach(user => {
-                    const userDiv = document.createElement('div');
-                    userDiv.className = 'flex items-center justify-between p-2 bg-gray-50 rounded-lg';
-                    userDiv.innerHTML = `
-                        <div>
-                            <p class="font-medium text-sm text-gray-800">${user.full_name}</p>
-                            <p class="text-xs text-gray-500">${user.email} - <span class="font-semibold">${user.role}</span></p>
-                        </div>
-                        <button onclick="deleteUser(${user.id})" class="text-red-500 hover:text-red-700">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    `;
-                    usersList.appendChild(userDiv);
-                });
-            } else {
-                usersList.innerHTML = `<p class="text-center text-gray-500">No users found.</p>`;
-            }
-        } catch (error) {
-            console.error('Error loading users:', error);
-        }
-    }
-
-    async function handleCreateUser(e) {
-        e.preventDefault();
-        const formData = {
-            full_name: document.getElementById('full-name').value,
-            email: document.getElementById('email').value,
-            password: document.getElementById('password').value,
-            role: document.getElementById('role').value
-        };
-
-        try {
-            const response = await fetch(`${API_BASE}/users.php`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            });
-            const data = await response.json();
-
-            if (data.success) {
-                showNotification('User created successfully!', 'success');
-                e.target.reset();
-                loadUsers();
-            } else {
-                showNotification(data.message || 'Error creating user', 'error');
-            }
-        } catch (error) {
-            showNotification('Error creating user.', 'error');
-        }
-    }
-
-    async function deleteUser(userId) {
-        if (!confirm('Are you sure you want to delete this user?')) return;
-        try {
-            const response = await fetch(`${API_BASE}/users.php`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: userId })
-            });
-            const data = await response.json();
-            if (data.success) {
-                showNotification('User deleted!', 'success');
-                loadUsers();
-            } else {
-                showNotification('Error deleting user.', 'error');
-            }
-        } catch (error) {
-            showNotification('Error deleting user.', 'error');
-        }
-    }
-
-
-    // --- CLIENT & INVOICE MANAGEMENT ---
-    // All functions from your original script (fetchClients, fetchInvoices, updateStats, etc.) go here
-     async function fetchClients() {
+    async function fetchClients() {
         try {
             const response = await fetch(`${API_BASE}/clients.php`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            clients = data;
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            clients = await response.json();
             loadClients();
             updateStats();
         } catch (error) {
             console.error('Error fetching clients:', error);
-            showNotification('Failed to fetch clients', 'error');
+            showToast('Failed to fetch clients', 'error');
         }
     }
 
     async function fetchInvoices() {
         try {
             const response = await fetch(`${API_BASE}/invoices.php`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            invoices = data;
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            invoices = await response.json();
             loadInvoices();
             updateStats();
         } catch (error) {
             console.error('Error fetching invoices:', error);
-            showNotification('Failed to fetch invoices', 'error');
+            showToast('Failed to fetch invoices', 'error');
         }
     }
 
@@ -558,20 +343,20 @@
         const tableBody = document.getElementById('clients-table-body');
         tableBody.innerHTML = '';
         if (clients.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4">No clients found.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">No clients found.</td></tr>`;
             return;
         }
         clients.forEach(client => {
             const row = document.createElement('tr');
-            row.className = 'client-row border-b';
+            row.className = 'border-b hover:bg-gray-50';
             row.innerHTML = `
                 <td class="py-3 px-2">${client.company}</td>
-                <td class="py-3 px-2">${client.email}</td>
-                <td class="py-3 px-2">${client.service}</td>
-                <td class="py-3 px-2">$${client.monthly_fee}</td>
+                <td class="py-3 px-2 text-gray-600">${client.email}</td>
+                <td class="py-3 px-2 text-gray-600">${client.service}</td>
+                <td class="py-3 px-2 font-medium">$${client.monthly_fee}</td>
                 <td class="py-3 px-2"><span class="status-badge ${client.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${client.status}</span></td>
-                <td class="py-3 px-2">
-                    <button class="text-red-600 hover:text-red-800" onclick="deleteClient(${client.id})"><i class="fas fa-trash"></i></button>
+                <td class="py-3 px-2 text-right">
+                    <button class="text-red-500 hover:text-red-700" onclick="deleteClient(${client.id})"><i class="fas fa-trash"></i></button>
                 </td>
             `;
             tableBody.appendChild(row);
@@ -579,25 +364,24 @@
     }
 
     function loadInvoices() {
-        const tableBody = document.getElementById('invoices-table-body');
-        tableBody.innerHTML = '';
+        const container = document.getElementById('invoices-table-body');
+        container.innerHTML = '';
         if (invoices.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4">No invoices found.</td></tr>`;
+            container.innerHTML = `<p class="text-center text-gray-500 py-4">No recent invoices.</p>`;
             return;
         }
         const recentInvoices = [...invoices].sort((a, b) => new Date(b.issued) - new Date(a.issued)).slice(0, 5);
         recentInvoices.forEach(invoice => {
-            const row = document.createElement('tr');
-            row.className = 'border-b';
-            row.innerHTML = `
-                <td class="py-3 px-2">#${invoice.id}</td>
-                <td class="py-3 px-2">${invoice.client_name}</td>
-                <td class="py-3 px-2">$${invoice.amount}</td>
-                <td class="py-3 px-2">${formatDate(invoice.issued)}</td>
-                <td class="py-3 px-2"><span class="status-badge ${invoice.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">${invoice.status}</span></td>
-                <td class="py-3 px-2"><button class="text-blue-600 hover:text-blue-800" onclick="viewInvoice(${invoice.id})"><i class="fas fa-eye"></i></button></td>
+            const item = document.createElement('div');
+            item.className = 'flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg';
+            item.innerHTML = `
+                <div>
+                    <p class="font-medium">${invoice.client_name} - $${invoice.amount}</p>
+                    <p class="text-sm text-gray-500">#${invoice.id} - Issued: ${formatDate(invoice.issued)}</p>
+                </div>
+                <span class="status-badge ${invoice.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">${invoice.status}</span>
             `;
-            tableBody.appendChild(row);
+            container.appendChild(item);
         });
     }
 
@@ -615,12 +399,12 @@
             body: JSON.stringify(newClient)
         });
         if (response.ok) {
-            showNotification('Client added successfully!', 'success');
+            showToast('Client added successfully!', 'success');
             fetchClients();
             e.target.reset();
             closeModal('add-client-modal');
         } else {
-            showNotification('Failed to add client.', 'error');
+            showToast('Failed to add client.', 'error');
         }
     }
 
@@ -643,12 +427,12 @@
         const result = await response.json();
         if (response.ok) {
             sendEmail(client, { id: result.invoice_id, ...newInvoice });
-            showNotification('Invoice sent successfully!', 'success');
+            showToast('Invoice sent successfully!', 'success');
             fetchInvoices();
             e.target.reset();
             closeModal('send-invoice-modal');
         } else {
-            showNotification('Failed to send invoice.', 'error');
+            showToast('Failed to send invoice.', 'error');
         }
     }
 
@@ -677,21 +461,6 @@
         };
     }
     
-    // Other helper functions: viewInvoice, sendEmail, deleteClient, toggleAutoInvoice, modals, etc.
-    function viewInvoice(invoiceId) {
-        const invoice = invoices.find(i => i.id === invoiceId);
-        if (!invoice) return;
-        
-        document.getElementById('view-invoice-number').textContent = invoice.id;
-        document.getElementById('view-invoice-client').textContent = invoice.client_name;
-        document.getElementById('view-invoice-service').textContent = invoice.service;
-        document.getElementById('view-invoice-amount').textContent = '$' + invoice.amount;
-        document.getElementById('view-invoice-issued').textContent = formatDate(invoice.issued);
-        document.getElementById('view-invoice-status').textContent = invoice.status;
-
-        openModal('view-invoice-modal');
-    }
-    
     function sendEmail(client, invoice) {
         const amount = parseFloat(invoice.amount);
         const emailParams = {
@@ -705,57 +474,41 @@
             dueDate: formatDate(invoice.due_date)
         };
         emailjs.send('service_g3x1dzf', 'template_ptf2tzg', emailParams)
-            .then(() => showNotification('Email sent successfully!', 'success'))
-            .catch((err) => showNotification('Failed to send email.', 'error'));
+            .then(() => showToast('Email sent successfully!', 'success'))
+            .catch((err) => showToast('Failed to send email.', 'error'));
     }
 
     async function deleteClient(clientId) {
-        if (confirm('Are you sure?')) {
+        if (confirm('Are you sure you want to delete this client?')) {
             const response = await fetch(`${API_BASE}/clients.php`, {
                 method: 'DELETE',
                 body: JSON.stringify({ id: clientId })
             });
             if (response.ok) {
-                showNotification('Client deleted.', 'success');
+                showToast('Client deleted.', 'success');
                 fetchClients();
             } else {
-                showNotification('Failed to delete client.', 'error');
+                showToast('Failed to delete client.', 'error');
             }
         }
     }
 
-    function toggleAutoInvoice() {
-        autoInvoiceEnabled = !autoInvoiceEnabled;
-        updateAutoInvoiceButton();
-        showNotification(`Auto-invoice ${autoInvoiceEnabled ? 'enabled' : 'disabled'}.`, 'success');
-    }
-
-    function updateAutoInvoiceButton() {
-        const btn = document.getElementById('auto-invoice-btn');
-        if (autoInvoiceEnabled) {
-            btn.innerHTML = '<i class="fas fa-robot mr-2"></i> Auto-Invoice: ON';
-            btn.classList.replace('bg-gray-600', 'bg-green-600');
-        } else {
-            btn.innerHTML = '<i class="fas fa-robot mr-2"></i> Auto-Invoice: OFF';
-            btn.classList.replace('bg-green-600', 'bg-gray-600');
-        }
-    }
-
-    function checkOverdueInvoices() { /* ... */ }
     function formatDate(dateString) {
         return new Date(dateString).toLocaleDateString(undefined, { timeZone: 'UTC' });
     }
-    function showNotification(message, type = 'info') {
-        const el = document.getElementById('notification');
-        el.textContent = message;
-        el.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white bg-${type === 'success' ? 'green' : 'red'}-500`;
-        el.classList.remove('hidden');
-        setTimeout(() => el.classList.add('hidden'), 3000);
+    
+    function showToast(message, type = 'info') {
+        const toast = document.getElementById('toast-notification');
+        toast.textContent = message;
+        toast.className = '';
+        toast.classList.add('show', type);
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
     }
-    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 </script>
-
-
 </body>
 </html>
