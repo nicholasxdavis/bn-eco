@@ -8,7 +8,7 @@ function sendPasswordResetEmail($email, $token, $customerName) {
     $user_id = 'vSfGjeaE52Lj_2lav'; // Public Key
     $accessToken = '0PQGh1CKPqu8REv5mnotS'; // Replace with your EmailJS Private Key
 
-    $resetLink = "https://yourdomain.com/reset_password.html?token=" . $token; // Important: Replace with your actual domain and path
+    $resetLink = "https://admin.blacnova.net/reset_password.html?token=" . $token; // Important: Replace with your actual domain and path
 
     $template_params = [
         'customerName' => $customerName,
