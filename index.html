@@ -12,6 +12,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <link rel="stylesheet" type="text/css" href="dashboard.css">
+        <link rel="icon" href="https://www.blacnova.net/img/bn_orange.png" type="image/png">
     <script>
         // Initialize EmailJS
         (function() {
@@ -275,6 +276,7 @@
                 <button id="send-welcome-email-btn" class="w-full btn-secondary py-2 rounded-lg">Send Welcome Email</button>
                 <button class="w-full btn-secondary py-2 rounded-lg" disabled>Send Password Reset</button>
                 <button class="w-full btn-secondary py-2 rounded-lg" disabled>Manual Override</button>
+                <button class="w-full btn-secondary py-2 rounded-lg" disabled>Manual Disable (Nonpayment)</button>
             </div>
         </div>
     </div>
@@ -690,7 +692,7 @@
     }
 
     function formatDate(dateString) {
-        return new Date(dateString).toLocaleDate-String(undefined, { timeZone: 'UTC' });
+        return new Date(dateString).toLocaleDateString(undefined, { timeZone: 'UTC' });
     }
     
     function showToast(message, type = 'info') {
