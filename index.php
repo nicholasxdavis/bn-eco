@@ -4,6 +4,7 @@
     <meta charset="UTF--8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blacnova Dashboard</title>
+      <link rel="icon" href="https://www.blacnova.net/img/bn_orange.png" type="image/png">
     <style>
         body, html {
             margin: 0;
