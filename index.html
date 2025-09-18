@@ -252,6 +252,10 @@
                         <option value="editor">Editor</option>
                         <option value="admin">Admin</option>
                     </select>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="send-welcome-email-checkbox" class="h-4 w-4 rounded bg-gray-800 border-gray-600 text-primary focus:ring-primary" checked>
+                        <label for="send-welcome-email-checkbox" class="ml-2 text-sm text-gray-600">Send Welcome Email</label>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" onclick="closeModal('add-user-modal')" class="btn-secondary px-4 py-2 rounded-lg">Cancel</button>
@@ -411,6 +415,7 @@
     async function handleCreateUser(e) {
         e.preventDefault();
         const password = document.getElementById('password').value;
+        const shouldSendEmail = document.getElementById('send-welcome-email-checkbox').checked;
         const formData = {
             full_name: document.getElementById('full-name').value,
             email: document.getElementById('email').value,
@@ -428,12 +433,14 @@
 
             if (data.success) {
                 showToast('User created successfully!', 'success');
-                sendWelcomeEmail({
-                    customerName: formData.full_name,
-                    username: formData.email,
-                    password: password,
-                    email: formData.email,
-                });
+                if (shouldSendEmail) {
+                    sendWelcomeEmail({
+                        customerName: formData.full_name,
+                        username: formData.email,
+                        password: password,
+                        email: formData.email,
+                    });
+                }
                 e.target.reset();
                 closeModal('add-user-modal');
                 loadUsers();
@@ -683,7 +690,7 @@
     }
 
     function formatDate(dateString) {
-        return new Date(dateString).toLocaleDateString(undefined, { timeZone: 'UTC' });
+        return new Date(dateString).toLocaleDate-String(undefined, { timeZone: 'UTC' });
     }
     
     function showToast(message, type = 'info') {
