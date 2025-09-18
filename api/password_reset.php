@@ -6,7 +6,7 @@ function sendPasswordResetEmail($email, $token, $customerName) {
     $service_id = 'service_c1ddi0x';
     $template_id = 'template_fakljk5';
     $user_id = 'vSfGjeaE52Lj_2lav'; // Public Key
-    $accessToken = 'YOUR_EMAILJS_PRIVATE_KEY'; // Replace with your EmailJS Private Key
+    $accessToken = '0PQGh1CKPqu8REv5mnotS'; // Replace with your EmailJS Private Key
 
     $resetLink = "https://yourdomain.com/reset_password.html?token=" . $token; // Important: Replace with your actual domain and path
 
