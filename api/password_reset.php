@@ -1,6 +1,48 @@
 <?php
 require_once 'db_connect.php';
 
+// --- SERVER-SIDE EMAIL FUNCTION USING EmailJS REST API ---
+function sendPasswordResetEmail($email, $token, $customerName) {
+    $service_id = 'service_c1ddi0x';
+    $template_id = 'template_fakljk5';
+    $user_id = 'vSfGjeaE52Lj_2lav'; // Public Key
+    $accessToken = 'YOUR_EMAILJS_PRIVATE_KEY'; // Replace with your EmailJS Private Key
+
+    $resetLink = "https://yourdomain.com/reset_password.html?token=" . $token; // Important: Replace with your actual domain and path
+
+    $template_params = [
+        'customerName' => $customerName,
+        'email' => $email,
+        'resetLink' => $resetLink
+    ];
+
+    $data = [
+        'service_id' => $service_id,
+        'template_id' => $template_id,
+        'user_id' => $user_id,
+        'template_params' => $template_params,
+        'accessToken' => $accessToken
+    ];
+
+    $payload = json_encode($data);
+    $ch = curl_init('https://api.emailjs.com/api/v1.0/email/send');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLINFO_HEADER_OUT, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Content-Length: ' . strlen($payload)
+    ]);
+
+    $response = curl_exec($ch);
+    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return $httpcode == 200;
+}
+
+
 // Set the correct content type header
 header('Content-Type: application/json');
 
@@ -26,30 +68,29 @@ try {
 
         $email = $data['email'];
 
-        $stmt = $pdo_auth->prepare("SELECT id FROM users WHERE email = ?");
+        $stmt = $pdo_auth->prepare("SELECT id, full_name FROM users WHERE email = ?");
         $stmt->execute([$email]);
+        $user = $stmt->fetch();
         
-        // We check if the user exists before proceeding
-        if ($stmt->fetch()) {
+        if ($user) {
             $token = bin2hex(random_bytes(32));
             $expires = new DateTime('now', new DateTimeZone('UTC'));
             $expires->add(new DateInterval('PT1H')); // Token expires in 1 hour
             $expires_str = $expires->format('Y-m-d H:i:s');
 
-            // Delete any existing tokens for this email to invalidate old links
             $del_stmt = $pdo_auth->prepare("DELETE FROM password_resets WHERE email = ?");
             $del_stmt->execute([$email]);
 
-            // Insert the new token into the database
             $ins_stmt = $pdo_auth->prepare("INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)");
             $ins_stmt->execute([$email, $token, $expires_str]);
 
-            // The actual email sending is handled by the frontend.
-            // We return the token so the frontend can build the reset link.
-            echo json_encode(['success' => true, 'token' => $token]);
+            // Send the password reset email
+            sendPasswordResetEmail($email, $token, $user['full_name']);
+
+            echo json_encode(['success' => true, 'message' => 'If a user with that email exists, a reset link will be sent.']);
         } else {
              // To prevent user enumeration, we send a generic success response even if the email is not found.
-             echo json_encode(['success' => true, 'token' => null, 'message' => 'If a user with that email exists, a reset link will be sent.']);
+             echo json_encode(['success' => true, 'message' => 'If a user with that email exists, a reset link will be sent.']);
         }
 
     // Action to perform the password update with a valid token
@@ -72,22 +113,17 @@ try {
         $now = new DateTime('now', new DateTimeZone('UTC'));
         $expires = new DateTime($reset_request['expires_at'], new DateTimeZone('UTC'));
 
-        // Check if the token has expired
         if ($now > $expires) {
-            // Clean up the expired token from the database
             $del_stmt = $pdo_auth->prepare("DELETE FROM password_resets WHERE token = ?");
             $del_stmt->execute([$token]);
             throw new Exception('Token has expired.');
         }
         
-        // If token is valid, hash the new password
         $password_hash = password_hash($new_password, PASSWORD_DEFAULT);
         
-        // Update the user's password in the users table
         $update_stmt = $pdo_auth->prepare("UPDATE users SET password_hash = ? WHERE email = ?");
         $update_stmt->execute([$password_hash, $reset_request['email']]);
 
-        // Delete the token so it cannot be reused
         $del_stmt = $pdo_auth->prepare("DELETE FROM password_resets WHERE token = ?");
         $del_stmt->execute([$token]);
 

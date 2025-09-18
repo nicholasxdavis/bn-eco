@@ -49,7 +49,7 @@
                         <input type="checkbox" id="remember-me" class="h-4 w-4 rounded bg-gray-800 border-gray-600 text-primary focus:ring-primary">
                         <span class="ml-2 text-sm">Remember me</span>
                     </label>
-                    <a href="#" class="text-sm text-primary hover:underline">Forgot password?</a>
+                    <a href="#" id="forgot-password-link" class="text-sm text-primary hover:underline">Forgot password?</a>
                 </div>
                 
                 <button type="submit" class="w-full py-3 rounded-lg bg-primary text-white font-semibold hover:bg-primary-dark transition-all duration-300">
@@ -60,14 +60,12 @@
             </form>
         </div>
     </div>
-
     <div id="app-container" class="hidden flex h-screen">
         <div class="w-64 bg-black border-r border-white/10 p-4 flex-col h-screen hidden md:flex">
             <div class="flex items-center space-x-3 mb-8">
                 <img src="https://www.blacnova.net/img/bn.png" alt="Blacnova Logo" class="w-10 h-10">
                 <h1 class="text-xl font-medium text-white">Admin</h1>
             </div>
-
             <nav class="space-y-1">
                 <div class="nav-item active-nav p-3 rounded-xl flex items-center space-x-3 text-white" data-page="dashboard-content">
                     <i class="fas fa-tachometer-alt w-5 text-center"></i>
@@ -78,12 +76,10 @@
                     <span>Users</span>
                 </div>
             </nav>
-
             <footer class="mt-auto text-center text-xs text-white/40 pt-6">
                 © 2025 Blacnova Development
             </footer>
         </div>
-
         <div class="flex-1 overflow-y-auto">
             <header class="hidden md:flex justify-between items-center bg-light-bg border-b border-gray-200 p-4">
                  <h1 id="page-title" class="text-2xl font-medium">Dashboard</h1>
@@ -97,7 +93,6 @@
                     </div>
                 </div>
             </header>
-
             <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
                 <div id="dashboard-content" class="page active">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -138,7 +133,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="flex flex-wrap gap-4 mb-8">
                         <button onclick="openModal('add-client-modal')" class="btn-primary px-6 py-3 rounded-lg flex items-center">
                             <i class="fas fa-user-plus mr-2"></i> Add Client
@@ -147,7 +141,6 @@
                             <i class="fas fa-paper-plane mr-2"></i> Send Invoice
                         </button>
                     </div>
-
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div class="lg:col-span-2 glass-card p-6 rounded-2xl">
                             <h2 class="text-xl font-semibold text-gray-800 mb-4">Clients</h2>
@@ -167,14 +160,12 @@
                                 </table>
                             </div>
                         </div>
-
                         <div class="glass-card p-6 rounded-2xl">
                             <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Invoices</h2>
                             <div id="invoices-table-body" class="space-y-4"></div>
                         </div>
                     </div>
                 </div>
-
                 <div id="users-content" class="page">
                     <div class="flex justify-between items-center mb-8">
                         <h2 class="text-2xl font-medium">User Management</h2>
@@ -189,7 +180,6 @@
             </main>
         </div>
     </div>
-
     <div id="add-client-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -216,7 +206,6 @@
             </form>
         </div>
     </div>
-
     <div id="send-invoice-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -236,7 +225,6 @@
             </form>
         </div>
     </div>
-
     <div id="add-user-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -282,13 +270,29 @@
     </div>
     
     <div id="toast-notification"></div>
-
+    <div id="forgot-password-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="text-xl font-medium">Reset Password</h3>
+                <button onclick="closeModal('forgot-password-modal')" class="text-gray-500 hover:text-primary"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="forgot-password-form">
+                <div class="modal-body space-y-4">
+                    <p class="text-gray-600">Enter your email address and we will send you a link to reset your password.</p>
+                    <input type="email" id="reset-email" placeholder="Your Email" class="w-full px-4 py-2 border rounded-lg" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="closeModal('forgot-password-modal')" class="btn-secondary px-4 py-2 rounded-lg">Cancel</button>
+                    <button type="submit" class="btn-primary px-4 py-2 rounded-lg">Send Reset Link</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <script>
     let clients = [];
     let invoices = [];
     let users = [];
     let selectedUser = null;
-
     document.addEventListener('DOMContentLoaded', function() {
         const authToken = localStorage.getItem('blacnova_auth_token');
         if (authToken) {
@@ -300,16 +304,19 @@
             }
             initializeApp();
         }
-
         document.getElementById('login-form').addEventListener('submit', handleLogin);
         document.getElementById('create-user-form').addEventListener('submit', handleCreateUser);
+        document.getElementById('forgot-password-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            openModal('forgot-password-modal');
+        });
+        document.getElementById('forgot-password-form').addEventListener('submit', handleForgotPassword);
         
         // Page switching
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
                 document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active-nav'));
                 item.classList.add('active-nav');
-
                 document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
                 const pageId = item.getAttribute('data-page');
                 document.getElementById(pageId).classList.add('active');
@@ -319,14 +326,12 @@
             });
         });
     });
-
     async function handleLogin(e) {
         e.preventDefault();
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
         const rememberMe = document.getElementById('remember-me').checked;
         const errorElement = document.getElementById('login-error');
-
         try {
             const response = await fetch(`${API_BASE}/login.php`, {
                 method: 'POST',
@@ -334,7 +339,6 @@
                 body: JSON.stringify({ email, password, remember: rememberMe })
             });
             const data = await response.json();
-
             if (data.success) {
                 if (rememberMe) {
                     localStorage.setItem('blacnova_auth_token', data.token);
@@ -343,7 +347,6 @@
                     sessionStorage.setItem('blacnova_auth_token', data.token);
                     sessionStorage.setItem('blacnova_user', JSON.stringify(data.user));
                 }
-
                 document.getElementById('auth-overlay').style.display = 'none';
                 document.getElementById('app-container').classList.remove('hidden');
                 
@@ -359,11 +362,29 @@
             errorElement.style.display = 'block';
         }
     }
-
+    async function handleForgotPassword(e) {
+        e.preventDefault();
+        const email = document.getElementById('reset-email').value;
+        try {
+            const response = await fetch(`${API_BASE}/password_reset.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'request_reset', email: email })
+            });
+            const data = await response.json();
+            if (data.success) {
+                closeModal('forgot-password-modal');
+                showToast('If an account with that email exists, a password reset link has been sent.', 'success');
+            } else {
+                showToast(data.message || 'An error occurred.', 'error');
+            }
+        } catch (error) {
+            showToast('A connection error occurred. Please try again.', 'error');
+        }
+    }
     function updateUserInfo(user) {
         const avatar = document.querySelector('#user-avatar span');
         const userInfo = document.getElementById('user-info');
-
         if (user.full_name) {
             avatar.textContent = user.full_name.match(/\b\w/g).join('').substring(0,2).toUpperCase();
             userInfo.querySelector('p.font-medium').textContent = user.full_name;
@@ -378,7 +399,6 @@
         document.getElementById('add-client-form').addEventListener('submit', handleAddClient);
         document.getElementById('send-invoice-form').addEventListener('submit', handleSendInvoice);
     }
-
     async function loadUsers() {
         try {
             const response = await fetch(`${API_BASE}/users.php`);
@@ -388,7 +408,6 @@
                 users = data.users;
                 const usersListContainer = document.getElementById('users-list');
                 usersListContainer.innerHTML = '';
-
                 if (users.length > 0) {
                     users.forEach(user => {
                         const userDiv = document.createElement('div');
@@ -413,7 +432,6 @@
             console.error('Error loading users:', error);
         }
     }
-
     async function handleCreateUser(e) {
         e.preventDefault();
         const password = document.getElementById('password').value;
@@ -424,7 +442,6 @@
             password: password,
             role: document.getElementById('role').value
         };
-
         try {
             const response = await fetch(`${API_BASE}/users.php`, {
                 method: 'POST',
@@ -432,7 +449,6 @@
                 body: JSON.stringify(formData)
             });
             const data = await response.json();
-
             if (data.success) {
                 showToast('User created successfully!', 'success');
                 if (shouldSendEmail) {
@@ -453,7 +469,6 @@
             showToast('Error creating user.', 'error');
         }
     }
-
     async function deleteUser(userId) {
         if (!confirm('Are you sure you want to delete this user?')) return;
         try {
@@ -473,7 +488,6 @@
             showToast('Error deleting user.', 'error');
         }
     }
-
     function openUserActions(userId) {
         selectedUser = users.find(u => u.id === userId);
         if (selectedUser) {
@@ -491,7 +505,6 @@
             openModal('user-actions-modal');
         }
     }
-
     function sendWelcomeEmail(params) {
         emailjs.send('service_g3x1dzf', 'template_mkjr7nk', params)
             .then(() => showToast('Welcome email sent successfully!', 'success'))
@@ -510,7 +523,6 @@
             showToast('Failed to fetch clients', 'error');
         }
     }
-
     async function fetchInvoices() {
         try {
             const response = await fetch(`${API_BASE}/invoices.php`);
@@ -523,7 +535,6 @@
             showToast('Failed to fetch invoices', 'error');
         }
     }
-
     function updateStats() {
         const monthlyRevenue = clients
             .filter(client => client.status === 'active')
@@ -531,12 +542,10 @@
         
         const activeClients = clients.filter(client => client.status === 'active').length;
         const pendingInvoices = invoices.filter(invoice => invoice.status === 'pending' || invoice.status === 'overdue').length;
-
         document.querySelector('#stats-monthly-revenue h3').textContent = `$${monthlyRevenue.toLocaleString()}`;
         document.querySelector('#stats-active-clients h3').textContent = activeClients;
         document.querySelector('#stats-pending-invoices h3').textContent = pendingInvoices;
     }
-
     function loadClients() {
         const tableBody = document.getElementById('clients-table-body');
         tableBody.innerHTML = '';
@@ -560,7 +569,6 @@
             tableBody.appendChild(row);
         });
     }
-
     function loadInvoices() {
         const container = document.getElementById('invoices-table-body');
         container.innerHTML = '';
@@ -582,7 +590,6 @@
             container.appendChild(item);
         });
     }
-
     async function handleAddClient(e) {
         e.preventDefault();
         const newClient = {
@@ -605,7 +612,6 @@
             showToast('Failed to add client.', 'error');
         }
     }
-
     async function handleSendInvoice(e) {
         e.preventDefault();
         const clientId = document.getElementById('invoice-client').value;
@@ -633,12 +639,10 @@
             showToast('Failed to send invoice.', 'error');
         }
     }
-
     function openSendInvoiceModal() {
         populateClientDropdown();
         openModal('send-invoice-modal');
     }
-
     function populateClientDropdown() {
         const dropdown = document.getElementById('invoice-client');
         dropdown.innerHTML = '<option value="">Select a client</option>';
@@ -675,7 +679,6 @@
             .then(() => showToast('Email sent successfully!', 'success'))
             .catch((err) => showToast('Failed to send email.', 'error'));
     }
-
     async function deleteClient(clientId) {
         if (confirm('Are you sure you want to delete this client?')) {
             const response = await fetch(`${API_BASE}/clients.php`, {
@@ -690,7 +693,6 @@
             }
         }
     }
-
     function formatDate(dateString) {
         return new Date(dateString).toLocaleDateString(undefined, { timeZone: 'UTC' });
     }
@@ -704,10 +706,8 @@
             toast.classList.remove('show');
         }, 3000);
     }
-
     function openModal(id) { document.getElementById(id).classList.add('active'); }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 </script>
 </body>
 </html>
-
