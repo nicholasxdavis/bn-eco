@@ -62,6 +62,34 @@
     </div>
 
     <div id="app-container" class="hidden flex h-screen">
+        <div id="mobile-sidebar" class="fixed inset-0 bg-black bg-opacity-70 z-20 hidden md:hidden">
+            <div class="w-64 h-full bg-black border-r border-white/10 p-4 flex flex-col">
+                <div class="flex justify-between items-center mb-8">
+                    <div class="flex items-center space-x-3">
+                        <img src="https://www.blacnova.net/img/bn.png" alt="Blacnova Logo" class="w-10 h-10">
+                    </div>
+                    <button id="close-mobile-menu" class="text-white hover:text-primary">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <nav class="space-y-1 mb-8">
+                    <div class="nav-item active-nav p-3 rounded-xl flex items-center space-x-3 text-white" data-page="dashboard-content">
+                        <i class="fas fa-tachometer-alt w-5 text-center"></i>
+                        <span>Dashboard</span>
+                    </div>
+                    <div class="nav-item p-3 rounded-xl flex items-center space-x-3 text-white" data-page="users-content">
+                        <i class="fas fa-users w-5 text-center"></i>
+                        <span>Users</span>
+                    </div>
+                    <div class="nav-item p-3 rounded-xl flex items-center space-x-3 text-white" id="logout-btn-mobile">
+                        <i class="fas fa-sign-out-alt w-5 text-center"></i>
+                        <span>Logout</span>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
         <div class="w-64 bg-black border-r border-white/10 p-4 flex-col h-screen hidden md:flex">
             <div class="flex items-center space-x-3 mb-8">
                 <img src="https://www.blacnova.net/img/bn.png" alt="Blacnova Logo" class="w-10 h-10">
@@ -85,6 +113,23 @@
         </div>
 
         <div class="flex-1 overflow-y-auto">
+            <div class="md:hidden fixed top-0 left-0 right-0 bg-light-bg border-b border-gray-200 p-4 z-10 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <button id="mobile-menu-button" class="text-gray-600 hover:text-primary">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div id="user-info-mobile" class="text-right">
+                        <p class="font-medium text-sm">User</p>
+                        <p class="text-xs text-gray-500">client@example.com</p>
+                    </div>
+                    <div id="user-avatar-mobile" class="w-8 h-8 rounded-full bg-[#d4611c] text-white flex items-center justify-center font-semibold">
+                        <span>U</span>
+                    </div>
+                </div>
+            </div>
+
             <header class="hidden md:flex justify-between items-center bg-light-bg border-b border-gray-200 p-4">
                  <h1 id="page-title" class="text-2xl font-medium">Dashboard</h1>
                 <div class="flex items-center space-x-4">
@@ -92,13 +137,16 @@
                         <p class="font-medium">User</p>
                         <p class="text-sm text-gray-500">client@example.com</p>
                     </div>
-                    <div id="user-avatar" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-semibold">
+                    <div id="user-avatar" class="w-10 h-10 rounded-full bg-[#d4611c] text-white flex items-center justify-center font-semibold">
                         <span>U</span>
                     </div>
+                    <button id="logout-btn" class="text-gray-600 hover:text-primary">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
                 </div>
             </header>
 
-            <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+            <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pt-20 md:pt-8">
                 <div id="dashboard-content" class="page active">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                         <div id="stats-monthly-revenue" class="stat-card glass-card p-6 rounded-2xl">
@@ -309,11 +357,11 @@
     let selectedUser = null;
 
     document.addEventListener('DOMContentLoaded', function() {
-        const authToken = localStorage.getItem('blacnova_auth_token');
+        const authToken = localStorage.getItem('blacnova_auth_token') || sessionStorage.getItem('blacnova_auth_token');
         if (authToken) {
             document.getElementById('auth-overlay').style.display = 'none';
             document.getElementById('app-container').classList.remove('hidden');
-            const user = JSON.parse(localStorage.getItem('blacnova_user'));
+            const user = JSON.parse(localStorage.getItem('blacnova_user') || sessionStorage.getItem('blacnova_user'));
             if(user) {
                 updateUserInfo(user);
             }
@@ -341,9 +389,32 @@
                 
                 const pageName = item.querySelector('span').textContent;
                 document.getElementById('page-title').textContent = pageName;
+
+                // Close mobile menu if open
+                document.getElementById('mobile-sidebar').classList.add('hidden');
             });
         });
+
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', () => {
+            document.getElementById('mobile-sidebar').classList.remove('hidden');
+        });
+        
+        document.getElementById('close-mobile-menu').addEventListener('click', () => {
+            document.getElementById('mobile-sidebar').classList.add('hidden');
+        });
+
+        document.getElementById('logout-btn-mobile').addEventListener('click', handleLogout);
+        document.getElementById('logout-btn').addEventListener('click', handleLogout);
     });
+
+    function handleLogout() {
+        localStorage.removeItem('blacnova_auth_token');
+        localStorage.removeItem('blacnova_user');
+        sessionStorage.removeItem('blacnova_auth_token');
+        sessionStorage.removeItem('blacnova_user');
+        location.reload();
+    }
 
     async function handleLogin(e) {
         e.preventDefault();
@@ -409,11 +480,18 @@
     function updateUserInfo(user) {
         const avatar = document.querySelector('#user-avatar span');
         const userInfo = document.getElementById('user-info');
+        const avatarMobile = document.querySelector('#user-avatar-mobile span');
+        const userInfoMobile = document.getElementById('user-info-mobile');
 
         if (user.full_name) {
-            avatar.textContent = user.full_name.match(/\b\w/g).join('').substring(0,2).toUpperCase();
+            const initials = user.full_name.match(/\b\w/g).join('').substring(0,2).toUpperCase();
+            avatar.textContent = initials;
             userInfo.querySelector('p.font-medium').textContent = user.full_name;
             userInfo.querySelector('p.text-sm').textContent = user.email;
+
+            avatarMobile.textContent = initials;
+            userInfoMobile.querySelector('p.font-medium').textContent = user.full_name;
+            userInfoMobile.querySelector('p.text-xs').textContent = user.email;
         }
     }
     
