@@ -87,28 +87,11 @@ if (count($clients) === 0) {
 }
 
 $invoicedClients = 0;
-$skippedClients = 0;
 
 // Create invoices and send emails for all active clients
 foreach ($clients as $client) {
     $today = date('Y-m-d');
     $dueDate = date('Y-m-d', strtotime('+14 days'));
-    $currentMonth = date('m');
-    $currentYear = date('Y');
-
-    // **FIX:** Check if an invoice already exists for this client in the current month
-    $checkStmt = $pdo->prepare("SELECT id FROM invoices WHERE client_id = :client_id AND MONTH(issued) = :month AND YEAR(issued) = :year");
-    $checkStmt->execute([
-        ':client_id' => $client['id'],
-        ':month' => $currentMonth,
-        ':year' => $currentYear
-    ]);
-
-    if ($checkStmt->fetch()) {
-        // An invoice already exists for this client this month, so skip.
-        $skippedClients++;
-        continue;
-    }
 
     $stmt = $pdo->prepare("INSERT INTO invoices
                            (client_id, client_name, amount, issued, due_date, status, service)
@@ -137,5 +120,5 @@ foreach ($clients as $client) {
     $invoicedClients++;
 }
 
-echo "Invoicing task completed. " . $invoicedClients . " invoices were processed. " . $skippedClients . " clients were skipped because they were already invoiced this month.\n";
+echo "Invoicing task completed. " . $invoicedClients . " invoices were processed.\n";
 ?>
