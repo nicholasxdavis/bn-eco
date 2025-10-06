@@ -22,6 +22,12 @@ $dbname_auth = 'default';
 $user_auth = 'mariadb';
 $pass_auth = 'JswmqQok4swQf1JDKQD1WE311UPXBBE6NYJv6jRSP91dbkZDYj5sMc5sehC1LQTu';
 
+// NEW: Database credentials for bn-outreach admin users
+$host_admin = 'f08cwk48kso8wo84wk0ow840';
+$dbname_admin = 'default';
+$user_admin = 'mariadb';
+$pass_admin = 'k8VUnt2oZhIgKebpi226TaRT9nwJN7B9kKGvhXTdqBNdzfnLe5r3hPmgLIVPZLYm';
+
 
 try {
     // Connection for bn-eco
@@ -33,6 +39,12 @@ try {
     $pdo_auth = new PDO("mysql:host=$host_auth;dbname=$dbname_auth;charset=utf8mb4", $user_auth, $pass_auth);
     $pdo_auth->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo_auth->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+
+    // NEW: Connection for admin users
+    $pdo_admin = new PDO("mysql:host=$host_admin;dbname=$dbname_admin;charset=utf8mb4", $user_admin, $pass_admin);
+    $pdo_admin->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo_admin->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+
 
 } catch(PDOException $e) {
     http_response_code(500);
